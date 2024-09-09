@@ -6,10 +6,12 @@ namespace Blog.Data.SeedWorks
 {
     public class RepositoryBase<T, Key> : IRepository<T, Key> where T : class
     {
+        protected readonly BlogContext _context;
         private readonly DbSet<T> _dbSet;
         public RepositoryBase(BlogContext context)
         {
             _dbSet = context.Set<T>();
+            _context = context;
         }
 
         public async Task<T> GetByIdAsync(Key id)
