@@ -26,24 +26,24 @@ namespace Blog.Data
             builder.Entity<IdentityUserRole<Guid>>().ToTable("AppUserRoles").HasKey(t => new { t.RoleId, t.UserId });
             builder.Entity<IdentityUserToken<Guid>>().ToTable("AppUserTokens").HasKey(t => new { t.UserId });
         }
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-        {
-            var entries = ChangeTracker.Entries().Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
-            foreach (var entityEntry in entries)
-            {
-                var dateCreatedProp = entityEntry.Entity.GetType().GetProperty("DateCreated");
-                if (entityEntry.State == EntityState.Added && dateCreatedProp != null)
-                {
-                    dateCreatedProp.SetValue(entityEntry.Entity, DateTime.Now);
-                }
+        //public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        //{
+        //    var entries = ChangeTracker.Entries().Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+        //    foreach (var entityEntry in entries)
+        //    {
+        //        var dateCreatedProp = entityEntry.Entity.GetType().GetProperty("DateCreated");
+        //        if (entityEntry.State == EntityState.Added && dateCreatedProp != null)
+        //        {
+        //            dateCreatedProp.SetValue(entityEntry.Entity, DateTime.Now);
+        //        }
 
-                var modifiedDateProp = entityEntry.Entity.GetType().GetProperty("ModifiedDate");
-                if (entityEntry.State == EntityState.Modified && modifiedDateProp != null)
-                {
-                    modifiedDateProp.SetValue(entityEntry.Entity, DateTime.Now);
-                }
-            }
-            return base.SaveChangesAsync(cancellationToken);
-        }
+        //        var modifiedDateProp = entityEntry.Entity.GetType().GetProperty("ModifiedDate");
+        //        if (entityEntry.State == EntityState.Modified && modifiedDateProp != null)
+        //        {
+        //            modifiedDateProp.SetValue(entityEntry.Entity, DateTime.Now);
+        //        }
+        //    }
+        //    return base.SaveChangesAsync(cancellationToken);
+        //}
     }
 }
