@@ -1,6 +1,8 @@
 using Blog.Api;
 using Blog.Core.Domain.Identity;
+using Blog.Core.SeedWorks;
 using Blog.Data;
+using Blog.Data.SeedWorks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -8,7 +10,6 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("DefaultConnection");
-// Add services to the container.
 
 // Config DBContext and ASP.NET Core Identity
 builder.Services.AddDbContext<BlogContext>(options => options.UseSqlServer(connectionString));
@@ -36,6 +37,10 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = false;
 
 });
+
+// Add services to the container.
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(RepositoryBase<,>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Default Config for ASP.NET Core
 builder.Services.AddControllers();
