@@ -1,14 +1,20 @@
-﻿using Blog.Core.SeedWorks;
+﻿using AutoMapper;
+using Blog.Core.Repositories;
+using Blog.Core.SeedWorks;
+using Blog.Data.Repositories;
 
 namespace Blog.Data.SeedWorks
 {
     public class UnitOfWork : IUnitOfWork
     {
         public readonly BlogContext _context;
-        public UnitOfWork(BlogContext context)
+        public UnitOfWork(BlogContext context, IMapper mapper)
         {
             _context = context;
+            Posts = new PostRepository(context, mapper);
         }
+
+        public IPostRepository Posts { get; private set; }
 
         public async Task<int> CompleteAsync()
         {

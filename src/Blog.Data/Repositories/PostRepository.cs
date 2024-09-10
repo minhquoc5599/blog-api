@@ -21,12 +21,12 @@ namespace Blog.Data.Repositories
             return _context.Posts.OrderByDescending(x => x.ViewCount).Take(count).ToListAsync();
         }
 
-        public async Task<PageResult<PostInListDto>> GetPostsPagingAsync(string keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
+        public async Task<PageResult<PostInListDto>> GetPostsPagingAsync(string? keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
         {
             var query = _context.Posts.AsQueryable();
             if (!string.IsNullOrEmpty(keyword))
             {
-                query = query.Where(x => x.Name == keyword);
+                query = query.Where(x => x.Name.Contains(keyword));
             }
             if (categoryId.HasValue)
             {
@@ -34,7 +34,7 @@ namespace Blog.Data.Repositories
             }
             var totalRow = await query.CountAsync();
             query = query.OrderByDescending(x => x.DateCreated)
-                .Skip((pageSize - 1) * pageIndex)
+                .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);
 
             return new PageResult<PostInListDto>
