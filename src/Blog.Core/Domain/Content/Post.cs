@@ -47,7 +47,6 @@ namespace Blog.Core.Domain.Content
         public bool IsPaid { get; set; }
         public double RoyaltyAmount { get; set; }
         public PostStatus Status { get; set; }
-
     }
     public enum PostStatus
     {
