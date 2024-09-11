@@ -25,7 +25,7 @@ namespace Blog.Api.Controllers.AdminApi
             var post = _mapper.Map<CreateUpdatePostRequest, Post>(request);
             _unitOfWork.Posts.Add(post);
             var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Ok() : BadRequest();
+            return result > 0 ? Created() : BadRequest();
         }
 
         [HttpPut("{id}")]
@@ -42,7 +42,7 @@ namespace Blog.Api.Controllers.AdminApi
         }
 
         [HttpDelete]
-        public async Task<ActionResult> DeletePost([FromQuery] Guid[] ids)
+        public async Task<ActionResult> DeletePosts([FromQuery] Guid[] ids)
         {
             foreach (var id in ids)
             {

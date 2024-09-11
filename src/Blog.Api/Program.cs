@@ -1,4 +1,6 @@
 using Blog.Api;
+using Blog.Api.Services;
+using Blog.Core.Configs;
 using Blog.Core.Domain.Identity;
 using Blog.Core.Models.Content;
 using Blog.Core.SeedWorks;
@@ -7,6 +9,7 @@ using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -40,10 +43,17 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = false;
 
 });
+builder.Services.Configure<JwtTokenSettings>(configuration.GetSection("JwtTokenSettings"));
 
 // Add services to the container.
 builder.Services.AddScoped(typeof(IRepository<,>), typeof(RepositoryBase<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Auth
+builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
+builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
+builder.Services.AddScoped<IToken, Token>();
+builder.Services.AddScoped<RoleManager<AppRole>, RoleManager<AppRole>>();
 
 // Business services and repositories
 var services = typeof(PostRepository).Assembly.GetTypes()
@@ -66,18 +76,19 @@ builder.Services.AddAutoMapper(typeof(PostInListDto));
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.CustomOperationIds(apiDesc =>
+    options.CustomOperationIds(apiDesc =>
     {
         return apiDesc.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null;
     });
-    c.SwaggerDoc("AdminAPI", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("AdminAPI", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Version = "v1",
         Title = "API for Admin",
         Description = "API CMS"
     });
+    options.ParameterFilter<SwaggerNullableParamterFilter>();
 });
 
 var app = builder.Build();
@@ -86,11 +97,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    app.UseSwaggerUI(options =>
     {
-        c.SwaggerEndpoint("AdminAPI/swagger.json", "Admin API");
-        c.DisplayOperationId();
-        c.DisplayRequestDuration();
+        options.SwaggerEndpoint("AdminAPI/swagger.json", "Admin API");
+        options.DisplayOperationId();
+        options.DisplayRequestDuration();
     });
 }
 
