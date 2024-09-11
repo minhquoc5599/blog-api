@@ -4,7 +4,7 @@ using Blog.Core.Models.Content;
 using Blog.Core.SeedWorks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Blog.Api.Controllers.AdminApi
+namespace Blog.Api.Controllers.Admin
 {
     [Route("api/admin/post")]
     [ApiController]

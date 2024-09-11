@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Blog.Api.Controllers.AdminApi
+namespace Blog.Api.Controllers.Admin
 {
     [Route("api/admin/auth")]
     [ApiController]

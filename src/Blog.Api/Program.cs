@@ -16,6 +16,13 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("DefaultConnection");
+var corsPolicy = "corsPolicy";
+
+builder.Services.AddCors(c => c.AddPolicy(corsPolicy, builder =>
+{
+    builder.AllowAnyMethod().AllowAnyHeader()
+    .WithOrigins(configuration["AllowedOrigins"]).AllowCredentials();
+}));
 
 // Config DBContext and ASP.NET Core Identity
 builder.Services.AddDbContext<BlogContext>(options => options.UseSqlServer(connectionString));
@@ -82,7 +89,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         return apiDesc.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null;
     });
-    options.SwaggerDoc("AdminAPI", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("admin", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Version = "v1",
         Title = "API for Admin",
@@ -99,11 +106,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("AdminAPI/swagger.json", "Admin API");
+        options.SwaggerEndpoint("admin/swagger.json", "Admin");
         options.DisplayOperationId();
         options.DisplayRequestDuration();
     });
 }
+
+app.UseCors(corsPolicy);
 
 app.UseHttpsRedirection();
 
