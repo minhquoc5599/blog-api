@@ -3,7 +3,7 @@
     public class JwtTokenSettings
     {
         public string Key { get; set; }
-        public string Isuses { get; set; }
+        public string Isuser { get; set; }
         public int ExpireHours { get; set; }
     }
 }
