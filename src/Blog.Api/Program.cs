@@ -1,4 +1,5 @@
 using Blog.Api;
+using Blog.Api.Authorization;
 using Blog.Api.Helps.Filters;
 using Blog.Api.Services;
 using Blog.Core.Configs;
@@ -9,9 +10,9 @@ using Blog.Data;
 using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -21,6 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("DefaultConnection");
 var corsPolicy = "corsPolicy";
+
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services.AddCors(c => c.AddPolicy(corsPolicy, builder =>
 {
@@ -108,13 +112,13 @@ builder.Services.AddAuthentication(auth =>
     auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(bearer =>
 {
-    bearer.RequireHttpsMetadata = true;
+    bearer.RequireHttpsMetadata = false;
     bearer.SaveToken = true;
     bearer.TokenValidationParameters = new TokenValidationParameters
     {
         ValidIssuer = configuration["JwtTokenSettings:Issuer"],
         ValidAudience = configuration["JwtTokenSettings:Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtTokenSettings.Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtTokenSettings:Key"]))
     };
 });
 

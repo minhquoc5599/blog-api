@@ -87,7 +87,7 @@ namespace Blog.Api.Controllers.Admin
         [Route("paging")]
         [Authorize(Permissions.Roles.View)]
         public async Task<ActionResult<PagingResult<RoleDto>>> GetRolesPaging(string? keyword,
-            int pageIndex, int pageSize)
+            int pageIndex = 1, int pageSize = 10)
         {
             var query = _roleManager.Roles;
             if (!string.IsNullOrEmpty(keyword))

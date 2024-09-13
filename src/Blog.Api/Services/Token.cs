@@ -22,8 +22,8 @@ namespace Blog.Api.Services
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
             var tokenOptions = new JwtSecurityToken(
-                issuer: _jwtTokenSettings.Isuser,
-                audience: _jwtTokenSettings.Isuser,
+                issuer: _jwtTokenSettings.Issuer,
+                audience: _jwtTokenSettings.Issuer,
                 claims: claims,
                 expires: DateTime.Now.AddHours(_jwtTokenSettings.ExpireHours),
                 signingCredentials: signinCredentials
