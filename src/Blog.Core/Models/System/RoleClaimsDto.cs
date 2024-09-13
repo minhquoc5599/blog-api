@@ -1,4 +1,4 @@
-﻿namespace Blog.Core.Models.Auth
+﻿namespace Blog.Core.Models.System
 {
     public class RoleClaimsDto
     {

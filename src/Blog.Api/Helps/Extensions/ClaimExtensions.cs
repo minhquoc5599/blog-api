@@ -1,11 +1,11 @@
 ﻿using Blog.Core.Domain.Identity;
-using Blog.Core.Models.Auth;
+using Blog.Core.Models.System;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel;
 using System.Reflection;
 using System.Security.Claims;
 
-namespace Blog.Api.Extensions
+namespace Blog.Api.Helps.Extensions
 {
     public static class ClaimExtensions
     {

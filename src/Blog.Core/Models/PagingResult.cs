@@ -1,9 +1,9 @@
 ﻿namespace Blog.Core.Models
 {
-    public class PageResult<T> : PageResultBase where T : class
+    public class PagingResult<T> : PagingResultBase where T : class
     {
         public List<T> Results { get; set; }
-        public PageResult()
+        public PagingResult()
         {
             Results = new List<T>();
         }

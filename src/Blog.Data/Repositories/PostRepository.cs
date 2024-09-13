@@ -21,7 +21,7 @@ namespace Blog.Data.Repositories
             return _context.Posts.OrderByDescending(x => x.ViewCount).Take(count).ToListAsync();
         }
 
-        public async Task<PageResult<PostInListDto>> GetPostsPagingAsync(string? keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
+        public async Task<PagingResult<PostInListDto>> GetPostsPagingAsync(string? keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
         {
             var query = _context.Posts.AsQueryable();
             if (!string.IsNullOrEmpty(keyword))
@@ -37,7 +37,7 @@ namespace Blog.Data.Repositories
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);
 
-            return new PageResult<PostInListDto>
+            return new PagingResult<PostInListDto>
             {
                 Results = await _mapper.ProjectTo<PostInListDto>(query).ToListAsync(),
                 CurrentPage = pageIndex,
