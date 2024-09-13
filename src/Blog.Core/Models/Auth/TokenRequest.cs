@@ -1,9 +1,8 @@
 ﻿namespace Blog.Core.Models.Auth
 {
-    public class LoginResult
+    public class TokenRequest
     {
-        public required string Token { get; set; }
+        public required string AccessToken { get; set; }
         public required string RefreshToken { get; set; }
-
     }
 }

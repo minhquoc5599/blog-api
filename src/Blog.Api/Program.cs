@@ -7,11 +7,14 @@ using Blog.Core.SeedWorks;
 using Blog.Data;
 using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -98,6 +101,22 @@ builder.Services.AddSwaggerGen(options =>
     options.ParameterFilter<SwaggerNullableParamterFilter>();
 });
 
+builder.Services.AddAuthentication(auth =>
+{
+    auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(bearer =>
+{
+    bearer.RequireHttpsMetadata = true;
+    bearer.SaveToken = true;
+    bearer.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = configuration["JwtTokenSettings:Issuer"],
+        ValidAudience = configuration["JwtTokenSettings:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtTokenSettings.Key"]))
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -115,6 +134,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors(corsPolicy);
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
