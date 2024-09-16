@@ -15,11 +15,17 @@ namespace Blog.Core.SeedWorks.Constants
             [Description("View roles")]
             public const string View = "Permissions.Roles.View";
 
+            [Description("View role permissions")]
+            public const string ViewRolePermissions = "Permissions.Roles.ViewRolePermissions";
+
             [Description("Create role")]
             public const string Create = "Permissions.Roles.Create";
 
             [Description("Edit role")]
             public const string Edit = "Permissions.Roles.Edit";
+
+            [Description("Edit role permissions")]
+            public const string EditRolePermissions = "Permissions.Roles.EditRolePermissions";
 
             [Description("Delete role")]
             public const string Delete = "Permissions.Roles.Delete";

@@ -3,7 +3,7 @@ using Blog.Core.Domain.Identity;
 
 namespace Blog.Core.Models.System
 {
-    public class RoleDto
+    public class RoleResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -12,7 +12,7 @@ namespace Blog.Core.Models.System
         {
             public AutoMapperProfiles()
             {
-                CreateMap<AppRole, RoleDto>();
+                CreateMap<AppRole, RoleResponse>();
             }
         }
     }

@@ -30,7 +30,7 @@ namespace Blog.Api.Controllers.Admin
         }
 
         [HttpPost]
-        public async Task<ActionResult<AuthenticatedResult>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<AuthenticatedResponse>> Login([FromBody] LoginRequest request)
         {
             if (request == null)
             {
@@ -70,7 +70,7 @@ namespace Blog.Api.Controllers.Admin
             user.RefreshTokenExpireTime = DateTime.Now.AddDays(30);
             await _userManager.UpdateAsync(user);
 
-            return Ok(new AuthenticatedResult
+            return Ok(new AuthenticatedResponse
             {
                 Token = accessToken,
                 RefreshToken = refreshToken

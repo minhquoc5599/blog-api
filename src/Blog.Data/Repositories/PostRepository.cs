@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Blog.Core.Domain.Content;
-using Blog.Core.Models;
+using Blog.Core.Models.Base;
 using Blog.Core.Models.Content;
 using Blog.Core.Repositories;
 using Blog.Data.SeedWorks;
@@ -21,7 +21,7 @@ namespace Blog.Data.Repositories
             return _context.Posts.OrderByDescending(x => x.ViewCount).Take(count).ToListAsync();
         }
 
-        public async Task<PagingResult<PostInListDto>> GetPostsPagingAsync(string? keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
+        public async Task<PagingResponse<PostInListDto>> GetPostsPagingAsync(string? keyword, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
         {
             var query = _context.Posts.AsQueryable();
             if (!string.IsNullOrEmpty(keyword))
@@ -37,7 +37,7 @@ namespace Blog.Data.Repositories
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize);
 
-            return new PagingResult<PostInListDto>
+            return new PagingResponse<PostInListDto>
             {
                 Results = await _mapper.ProjectTo<PostInListDto>(query).ToListAsync(),
                 CurrentPage = pageIndex,

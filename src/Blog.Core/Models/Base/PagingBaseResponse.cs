@@ -1,6 +1,6 @@
-﻿namespace Blog.Core.Models
+﻿namespace Blog.Core.Models.Base
 {
-    public abstract class PagingResultBase
+    public abstract class PagingBaseResponse
     {
         public int CurrentPage { get; set; }
         public int PageCount

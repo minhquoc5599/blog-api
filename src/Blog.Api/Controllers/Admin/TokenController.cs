@@ -22,7 +22,7 @@ namespace Blog.Api.Controllers.Admin
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<ActionResult<AuthenticatedResult>> Refresh(TokenRequest request)
+        public async Task<ActionResult<AuthenticatedResponse>> Refresh(TokenRequest request)
         {
             if (request == null)
             {
@@ -53,14 +53,14 @@ namespace Blog.Api.Controllers.Admin
 
                 await _userManager.UpdateAsync(user);
 
-                return Ok(new AuthenticatedResult()
+                return Ok(new AuthenticatedResponse()
                 {
                     Token = newAccessToken,
                     RefreshToken = newRefreshToken,
                 });
             }
 
-            return Ok(new AuthenticatedResult()
+            return Ok(new AuthenticatedResponse()
             {
                 Token = newAccessToken,
                 RefreshToken = refreshToken,
