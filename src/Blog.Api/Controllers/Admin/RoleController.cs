@@ -29,7 +29,7 @@ namespace Blog.Api.Controllers.Admin
         [HttpPost]
         [ValidateModel]
         [Authorize(Permissions.Roles.Create)]
-        public async Task<ActionResult> CreateRole([FromBody] CreateUpdateRoleRequest request)
+        public async Task<IActionResult> CreateRole([FromBody] CreateUpdateRoleRequest request)
         {
             await _roleManager.CreateAsync(new AppRole
             {
@@ -43,7 +43,7 @@ namespace Blog.Api.Controllers.Admin
         [HttpPut("{id}")]
         [ValidateModel]
         [Authorize(Permissions.Roles.Edit)]
-        public async Task<ActionResult> UpdateRole(Guid id, [FromBody] CreateUpdateRoleRequest request)
+        public async Task<IActionResult> UpdateRole(Guid id, [FromBody] CreateUpdateRoleRequest request)
         {
             var role = await _roleManager.FindByIdAsync(id.ToString());
             if (role == null)
@@ -58,7 +58,7 @@ namespace Blog.Api.Controllers.Admin
 
         [HttpDelete]
         [Authorize(Permissions.Roles.Delete)]
-        public async Task<ActionResult> DeleteRoles([FromQuery] Guid[] ids)
+        public async Task<IActionResult> DeleteRoles([FromQuery] Guid[] ids)
         {
             foreach (var id in ids)
             {

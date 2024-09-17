@@ -44,6 +44,18 @@ namespace Blog.Core.SeedWorks.Constants
 
             [Description("Delete user")]
             public const string Delete = "Permissions.Users.Delete";
+
+            [Description("Change password current user")]
+            public const string ChangePasswordCurrentUser = "Permissions.Users.ChangePasswordCurrentUser";
+
+            [Description("Set password user")]
+            public const string SetPassword = "Permissions.Users.SetPassword";
+
+            [Description("Change email")]
+            public const string ChangeEmail = "Permissions.Users.ChangeEmail";
+
+            [Description("Assign roles to user")]
+            public const string AssignRolesToUser = "Permissions.Users.AssignRolesToUser";
         }
 
         public static class PostCategories
