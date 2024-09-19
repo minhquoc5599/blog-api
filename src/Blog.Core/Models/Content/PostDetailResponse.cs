@@ -3,7 +3,7 @@ using Blog.Core.Domain.Content;
 
 namespace Blog.Core.Models.Content
 {
-    public class PostDto : PostInListDto
+    public class PostDetailResponse : PostResponse
     {
         public Guid CategoryId { get; set; }
         public string? Content { get; set; }
@@ -19,7 +19,7 @@ namespace Blog.Core.Models.Content
         {
             public AutoMapperProfiles()
             {
-                CreateMap<Post, PostDto>();
+                CreateMap<Post, PostDetailResponse>();
             }
         }
     }

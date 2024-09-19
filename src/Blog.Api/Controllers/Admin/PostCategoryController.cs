@@ -33,7 +33,7 @@ namespace Blog.Api.Controllers.Admin
             return result > 0 ? Ok() : BadRequest();
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [Authorize(Permissions.PostCategories.Edit)]
         public async Task<IActionResult> UpdatePostCategory(Guid id, [FromBody] CreateUpdatePostCategoryRequest request)
         {
@@ -86,7 +86,7 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<PostCategoryResponse>>> GetPostCategoriesPaging(
             string? keyword, int pageIndex, int pageSize = 10)
         {
-            var result = await _unitOfWork.PostCategories.GetAllPagingAsync(keyword, pageIndex, pageSize);
+            var result = await _unitOfWork.PostCategories.GetPostsAsync(keyword, pageIndex, pageSize);
             return Ok(result);
         }
 

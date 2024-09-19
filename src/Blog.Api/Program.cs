@@ -85,7 +85,7 @@ foreach (Type? service in services)
     }
 }
 
-builder.Services.AddAutoMapper(typeof(PostInListDto));
+builder.Services.AddAutoMapper(typeof(PostResponse));
 
 // Default Config for ASP.NET Core
 builder.Services.AddControllers();

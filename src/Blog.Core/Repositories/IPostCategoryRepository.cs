@@ -7,7 +7,7 @@ namespace Blog.Core.Repositories
 {
     public interface IPostCategoryRepository : IRepository<PostCategory, Guid>
     {
-        Task<PagingResponse<PostCategoryResponse>> GetAllPagingAsync(string? keyword, int pageIndex = 1,
+        Task<PagingResponse<PostCategoryResponse>> GetPostsAsync(string? keyword, int pageIndex = 1,
             int pageSize = 1);
     }
 }

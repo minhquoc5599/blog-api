@@ -89,6 +89,21 @@ namespace Blog.Core.SeedWorks.Constants
 
             [Description("Approve post")]
             public const string Approve = "Permissions.Posts.Approve";
+
+            [Description("Submit for approval")]
+            public const string SubmitForApproval = "Permissions.Posts.SubmitForApproval";
+
+            [Description("Reject post")]
+            public const string RejectPost = "Permissions.Posts.RejectPost";
+
+            [Description("Reject Reason")]
+            public const string RejectReason = "Permissions.Posts.RejectReason";
+
+            [Description("Get post activity logs")]
+            public const string GetPostActivityLogs = "Permissions.Posts.GetPostActivityLogs";
+
+            [Description("Get series")]
+            public const string GetSeries = "Permissions.Posts.GetSeries";
         }
 
         public static class Series
@@ -104,6 +119,15 @@ namespace Blog.Core.SeedWorks.Constants
 
             [Description("Delete series")]
             public const string Delete = "Permissions.Series.Delete";
+
+            [Description("Add post in series")]
+            public const string AddPostInSeries = "Permissions.Series.AddPostInSeries";
+
+            [Description("Delete post in series")]
+            public const string DeletePostInSeries = "Permissions.Series.DeletePostInSeries";
+
+            [Description("get posts in series")]
+            public const string GetPostsInSeries = "Permissions.Series.GetPostsInSeries";
         }
 
         public static class Royalty

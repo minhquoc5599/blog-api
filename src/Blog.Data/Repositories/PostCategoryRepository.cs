@@ -16,7 +16,7 @@ namespace Blog.Data.Repositories
             _mapper = mapper;
         }
 
-        public async Task<PagingResponse<PostCategoryResponse>> GetAllPagingAsync(string? keyword, int pageIndex = 1, int pageSize = 1)
+        public async Task<PagingResponse<PostCategoryResponse>> GetPostsAsync(string? keyword, int pageIndex = 1, int pageSize = 1)
         {
             var query = _context.PostCategories.AsQueryable();
             if (!string.IsNullOrWhiteSpace(keyword))

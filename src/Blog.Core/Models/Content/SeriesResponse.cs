@@ -1,27 +1,23 @@
 ﻿using AutoMapper;
 using Blog.Core.Domain.Content;
-using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Core.Models.Content
 {
-    public class PostInListDto
+    public class SeriesResponse
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
+        public required string Description { get; set; }
         public required string Slug { get; set; }
-
-        [MaxLength(500)]
-        public string? Description { get; set; }
-        public string? Thumbnail { get; set; }
-
-        public int ViewCount { get; set; }
-        public DateTime DateCreated { get; set; }
+        public bool IsActive { get; set; }
+        public int SortOrder { get; set; }
+        public Guid AuthorUserId { get; set; }
 
         public class AutoMapperProfiles : Profile
         {
             public AutoMapperProfiles()
             {
-                CreateMap<Post, PostInListDto>();
+                CreateMap<Series, SeriesResponse>();
             }
         }
     }
