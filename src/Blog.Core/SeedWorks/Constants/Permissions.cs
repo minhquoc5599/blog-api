@@ -94,7 +94,7 @@ namespace Blog.Core.SeedWorks.Constants
             public const string SubmitForApproval = "Permissions.Posts.SubmitForApproval";
 
             [Description("Reject post")]
-            public const string RejectPost = "Permissions.Posts.RejectPost";
+            public const string Reject = "Permissions.Posts.Reject";
 
             [Description("Reject Reason")]
             public const string RejectReason = "Permissions.Posts.RejectReason";

@@ -67,7 +67,7 @@ namespace Blog.Api.Controllers.Admin
         [HttpGet]
         [Route("{id}")]
         [Authorize(Permissions.Series.View)]
-        public async Task<ActionResult<SeriesResponse>> GetSeriesById(Guid id)
+        public async Task<ActionResult<SeriesDetailResponse>> GetSeriesById(Guid id)
         {
             var series = await _unitOfWork.Series.GetByIdAsync(id);
             if (series == null)

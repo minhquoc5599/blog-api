@@ -59,6 +59,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 });
 builder.Services.Configure<JwtTokenSettings>(configuration.GetSection("JwtTokenSettings"));
+builder.Services.Configure<MediaSettings>(configuration.GetSection("MediaSettings"));
 
 // Add services to the container.
 builder.Services.AddScoped(typeof(IRepository<,>), typeof(RepositoryBase<,>));
@@ -135,6 +136,7 @@ if (app.Environment.IsDevelopment())
         options.DisplayRequestDuration();
     });
 }
+app.UseStaticFiles();
 
 app.UseCors(corsPolicy);
 

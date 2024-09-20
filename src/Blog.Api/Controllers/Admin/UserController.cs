@@ -86,7 +86,6 @@ namespace Blog.Api.Controllers.Admin
             }
 
             var user = _mapper.Map<CreateUserRequest, AppUser>(request);
-            user.DateCreated = DateTime.Now;
 
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)

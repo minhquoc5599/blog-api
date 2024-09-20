@@ -2,6 +2,7 @@
 using Blog.Api.Helps.Extensions;
 using Blog.Core.Domain.Content;
 using Blog.Core.Domain.Identity;
+using Blog.Core.Models.Base;
 using Blog.Core.Models.Content;
 using Blog.Core.SeedWorks;
 using Blog.Core.SeedWorks.Constants;
@@ -38,6 +39,13 @@ namespace Blog.Api.Controllers.Admin
             var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
             post.CategoryId = postCategory.Id;
             post.CategoryName = postCategory.Name;
+            post.CategorySlug = postCategory.Slug;
+
+            var userId = User.GetUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            post.AuthorUserId = userId;
+            post.AuthorName = user.GetFullName();
+            post.AuthorUserName = user.UserName;
             _unitOfWork.Posts.Add(post);
 
             var result = await _unitOfWork.CompleteAsync();
@@ -91,20 +99,21 @@ namespace Blog.Api.Controllers.Admin
         [HttpGet]
         [Route("{id}")]
         [Authorize(Permissions.Posts.View)]
-        public async Task<ActionResult<PostDetailResponse>> GetPostById(Guid Id)
+        public async Task<ActionResult<PostDetailResponse>> GetPostById(Guid id)
         {
-            var post = await _unitOfWork.Posts.GetByIdAsync(Id);
+            var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
-            return Ok(post);
+            var result = _mapper.Map<PostDetailResponse>(post);
+            return Ok(result);
         }
 
         [HttpGet]
         [Route("paging")]
         [Authorize(Permissions.Posts.View)]
-        public async Task<ActionResult<PostResponse>> GetPostsPaging(string? keyword, Guid? categoryId,
+        public async Task<ActionResult<PagingResponse<PostResponse>>> GetPostsPaging(string? keyword, Guid? categoryId,
             int pageIndex, int pageSize = 10)
         {
             var userId = User.GetUserId();
@@ -131,7 +140,7 @@ namespace Blog.Api.Controllers.Admin
         }
 
         [HttpPost("reject/{id}")]
-        [Authorize(Permissions.Posts.RejectPost)]
+        [Authorize(Permissions.Posts.Reject)]
         public async Task<IActionResult> RejectPost(Guid id, [FromBody] ReturnBackRequest model)
         {
             await _unitOfWork.Posts.Reject(id, User.GetUserId(), model.Reason);

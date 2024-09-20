@@ -85,7 +85,7 @@ namespace Blog.Data.Repositories
             var query = from pis in _context.PostInSeries
                         join s in _context.Series
                         on pis.SeriesId equals s.Id
-                        where pis.SeriesId == postId
+                        where pis.PostId == postId
                         select s;
             return await _mapper.ProjectTo<SeriesResponse>(query).ToListAsync();
         }
@@ -99,7 +99,6 @@ namespace Blog.Data.Repositories
                 Id = Guid.NewGuid(),
                 FromStatus = post.Status,
                 ToStatus = PostStatus.Published,
-                DateCreated = DateTime.Now,
                 UserId = currentUserId,
                 UserName = user.UserName,
                 PostId = id,
@@ -118,7 +117,6 @@ namespace Blog.Data.Repositories
                 Id = Guid.NewGuid(),
                 FromStatus = post.Status,
                 ToStatus = PostStatus.WaitingForApproval,
-                DateCreated = DateTime.Now,
                 UserId = currentUserId,
                 UserName = user.UserName,
                 PostId = id,

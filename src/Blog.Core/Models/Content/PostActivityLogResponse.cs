@@ -1,4 +1,5 @@
-﻿using Blog.Core.Domain.Content;
+﻿using AutoMapper;
+using Blog.Core.Domain.Content;
 
 namespace Blog.Core.Models.Content
 {
@@ -9,5 +10,13 @@ namespace Blog.Core.Models.Content
         public DateTime DateCreated { get; set; }
         public string? Note { get; set; }
         public string UserName { get; set; }
+
+        public class AutoMapperProfiles : Profile
+        {
+            public AutoMapperProfiles()
+            {
+                CreateMap<PostActivityLog, PostActivityLogResponse>();
+            }
+        }
     }
 }
