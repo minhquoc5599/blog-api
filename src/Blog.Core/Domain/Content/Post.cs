@@ -62,6 +62,8 @@ namespace Blog.Core.Domain.Content
         [MaxLength(250)]
         public string AuthorName { get; set; }
 
+        public DateTime? PaidDate { get; set; }
+
     }
     public enum PostStatus
     {

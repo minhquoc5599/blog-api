@@ -16,12 +16,14 @@ namespace Blog.Data.SeedWorks
             Posts = new PostRepository(context, mapper, userManager);
             PostCategories = new PostCategoryRepository(context, mapper);
             Series = new SeriesRepository(context, mapper);
+            Transactions = new TransactionRepository(context, mapper);
         }
 
         public IPostRepository Posts { get; private set; }
 
         public IPostCategoryRepository PostCategories { get; private set; }
         public ISeriesRepository Series { get; private set; }
+        public ITransactionRepository Transactions { get; private set; }
 
         public async Task<int> CompleteAsync()
         {

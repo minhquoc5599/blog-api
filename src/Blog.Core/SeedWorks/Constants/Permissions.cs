@@ -132,8 +132,15 @@ namespace Blog.Core.SeedWorks.Constants
 
         public static class Royalty
         {
-            [Description("View royalty")]
-            public const string View = "Permissions.Royalty.View";
+            [Description("Get transactions")]
+            public const string GetTransactions = "Permissions.Royalty.GetTransactions";
+
+            [Description("GetRoyaltyReport")]
+            public const string GetRoyaltyReport = "Permissions.Royalty.GetRoyaltyReport";
+
+            [Description("GetRoyaltyReportByMonth")]
+            public const string GetRoyaltyReportByMonth = "Permissions.Royalty.GetRoyaltyReportByMonth";
+
             [Description("Pay royalty")]
             public const string Pay = "Permissions.Royalty.Pay";
         }

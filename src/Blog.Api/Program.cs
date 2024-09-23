@@ -6,9 +6,11 @@ using Blog.Core.Configs;
 using Blog.Core.Domain.Identity;
 using Blog.Core.Models.Content;
 using Blog.Core.SeedWorks;
+using Blog.Core.Services;
 using Blog.Data;
 using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
+using Blog.Data.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -70,6 +72,7 @@ builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
 builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 builder.Services.AddScoped<IToken, Token>();
 builder.Services.AddScoped<RoleManager<AppRole>, RoleManager<AppRole>>();
+builder.Services.AddScoped<IRoyaltyService, RoyaltyService>();
 
 // Business services and repositories
 var services = typeof(PostRepository).Assembly.GetTypes()

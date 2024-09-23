@@ -27,7 +27,7 @@ namespace Blog.Data.Repositories
             return _context.Posts.OrderByDescending(x => x.ViewCount).Take(count).ToListAsync();
         }
 
-        public async Task<PagingResponse<PostResponse>> GetPostsAsync(string? keyword, Guid currentUserId, Guid? categoryId, int pageIndex = 1, int pageSize = 1)
+        public async Task<PagingResponse<PostResponse>> GetPostsAsync(string? keyword, Guid currentUserId, Guid? categoryId, int pageIndex = 1, int pageSize = 10)
         {
             var user = await _userManager.FindByIdAsync(currentUserId.ToString()) ?? throw new Exception("User does not exist");
             var roles = await _userManager.GetRolesAsync(user);
@@ -166,6 +166,13 @@ namespace Blog.Data.Repositories
             var query = _context.PostActivityLogs.Where(x => x.PostId == id)
                 .OrderByDescending(x => x.DateCreated);
             return await _mapper.ProjectTo<PostActivityLogResponse>(query).ToListAsync();
+        }
+
+        public async Task<List<Post>> GetListUnpaidPublishPosts(Guid userId)
+        {
+            return await _context.Posts
+                .Where(x => x.AuthorUserId == userId && x.IsPaid == false && x.Status == PostStatus.Published)
+                .ToListAsync();
         }
     }
 }
