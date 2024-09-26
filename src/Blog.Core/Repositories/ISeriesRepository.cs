@@ -12,6 +12,7 @@ namespace Blog.Core.Repositories
         Task RemovePostToSeries(Guid seriesId, Guid postId);
         Task<List<PostResponse>> GetPostsInSeries(Guid seriesId);
         Task<bool> IsPostInSeries(Guid seriesId, Guid postId);
+        Task<bool> CheckExistPost(Guid seriesId);
 
     }
 }

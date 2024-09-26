@@ -38,16 +38,21 @@ namespace Blog.Api.Controllers.Admin
             }
 
             var user = await _userManager.FindByNameAsync(request.UserName);
-            if (user == null || user.IsActive == false || user.LockoutEnabled)
+            if(user == null)
             {
-                return Unauthorized();
+                return NotFound();
+            }
+
+            if (user.IsActive == false || user.LockoutEnabled)
+            {
+                return Unauthorized("User has been locked out");
             }
 
             var result = await _signInManager.PasswordSignInAsync(request.UserName, request.Password,
                 false, true);
             if (!result.Succeeded)
             {
-                return Unauthorized();
+                return Unauthorized("Login failed");
             }
 
             var roles = await _userManager.GetRolesAsync(user);

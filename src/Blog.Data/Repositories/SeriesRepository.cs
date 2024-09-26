@@ -85,5 +85,10 @@ namespace Blog.Data.Repositories
                 _context.PostInSeries.Remove(postInSeries);
             }
         }
+
+        public async Task<bool> CheckExistPost(Guid seriesId)
+        {
+            return await _context.PostInSeries.AnyAsync(x => x.SeriesId == seriesId);
+        }
     }
 }

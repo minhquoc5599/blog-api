@@ -60,6 +60,10 @@ namespace Blog.Api.Controllers.Admin
                 {
                     return NotFound();
                 }
+                if (await _unitOfWork.PostCategories.CheckExistPost(id))
+                {
+                    return Ok("The category contains posts and cannot be deleted");
+                }
                 _unitOfWork.PostCategories.Remove(postCategory);
             }
             var result = await _unitOfWork.CompleteAsync();
@@ -86,7 +90,7 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<PostCategoryResponse>>> GetPostCategoriesPaging(
             string? keyword, int pageIndex, int pageSize = 10)
         {
-            var result = await _unitOfWork.PostCategories.GetPostsAsync(keyword, pageIndex, pageSize);
+            var result = await _unitOfWork.PostCategories.GetPostCategoriesAsync(keyword, pageIndex, pageSize);
             return Ok(result);
         }
 

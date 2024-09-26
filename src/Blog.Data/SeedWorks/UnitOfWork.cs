@@ -13,14 +13,15 @@ namespace Blog.Data.SeedWorks
         public UnitOfWork(BlogContext context, IMapper mapper, UserManager<AppUser> userManager)
         {
             _context = context;
+            Users = new UserRepository(context); 
             Posts = new PostRepository(context, mapper, userManager);
             PostCategories = new PostCategoryRepository(context, mapper);
             Series = new SeriesRepository(context, mapper);
             Transactions = new TransactionRepository(context, mapper);
         }
 
+        public IUserRepository Users { get; private set; }
         public IPostRepository Posts { get; private set; }
-
         public IPostCategoryRepository PostCategories { get; private set; }
         public ISeriesRepository Series { get; private set; }
         public ITransactionRepository Transactions { get; private set; }

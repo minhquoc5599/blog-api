@@ -16,7 +16,7 @@ namespace Blog.Data.Repositories
             _mapper = mapper;
         }
 
-        public async Task<PagingResponse<PostCategoryResponse>> GetPostsAsync(string? keyword, int pageIndex = 1, int pageSize = 1)
+        public async Task<PagingResponse<PostCategoryResponse>> GetPostCategoriesAsync(string? keyword, int pageIndex = 1, int pageSize = 1)
         {
             var query = _context.PostCategories.AsQueryable();
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -36,6 +36,11 @@ namespace Blog.Data.Repositories
                 RowCount = totalRow,
                 PageSize = pageSize
             };
+        }
+
+        public async Task<bool> CheckExistPost(Guid postCategoryId)
+        {
+            return await _context.Posts.AnyAsync(x => x.CategoryId == postCategoryId);
         }
     }
 }

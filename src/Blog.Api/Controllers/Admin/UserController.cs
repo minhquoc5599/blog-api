@@ -4,6 +4,7 @@ using Blog.Api.Helps.Filters;
 using Blog.Core.Domain.Identity;
 using Blog.Core.Models.Base;
 using Blog.Core.Models.System;
+using Blog.Core.SeedWorks;
 using Blog.Core.SeedWorks.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,13 @@ namespace Blog.Api.Controllers.Admin
     public class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public UserController(IMapper mapper, UserManager<AppUser> userManager)
+        public UserController(IMapper mapper, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
 
@@ -201,16 +204,14 @@ namespace Blog.Api.Controllers.Admin
                 return NotFound();
             }
             var currentRoles = await _userManager.GetRolesAsync(user);
-            var removedResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            await _unitOfWork.Users.RemoveRoles(user.Id, [.. currentRoles]);
             var addedResult = await _userManager.AddToRolesAsync(user, roles);
 
-            if (!addedResult.Succeeded || !removedResult.Succeeded)
+            if (!addedResult.Succeeded)
             {
                 List<IdentityError> addedErrorList = addedResult.Errors.ToList();
-                List<IdentityError> removedErrorList = removedResult.Errors.ToList();
                 var errorList = new List<IdentityError>();
                 errorList.AddRange(addedErrorList);
-                errorList.AddRange(removedErrorList);
 
                 return BadRequest(string.Join("<br", errorList.Select(_x => _x.Description)));
             }

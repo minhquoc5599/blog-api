@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Blog.Core.Domain.Identity
 {
+    [Table("AppUsers")]
     public class AppUser : IdentityUser<Guid>
     {
         [Required]

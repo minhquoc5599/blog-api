@@ -53,11 +53,11 @@ builder.Services.Configure<IdentityOptions>(options =>
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.AllowedForNewUsers = false;
 
     // User settings
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ";
-    options.User.RequireUniqueEmail = false;
+    options.User.RequireUniqueEmail = true;
 
 });
 builder.Services.Configure<JwtTokenSettings>(configuration.GetSection("JwtTokenSettings"));
@@ -120,6 +120,8 @@ builder.Services.AddAuthentication(auth =>
     bearer.SaveToken = true;
     bearer.TokenValidationParameters = new TokenValidationParameters
     {
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromSeconds(0),
         ValidIssuer = configuration["JwtTokenSettings:Issuer"],
         ValidAudience = configuration["JwtTokenSettings:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtTokenSettings:Key"]))
