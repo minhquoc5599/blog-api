@@ -60,7 +60,7 @@ namespace Blog.Api.Controllers.Admin
                 }
                 if (await _unitOfWork.Series.CheckExistPost(id))
                 {
-                    return Ok("The series contains posts and cannot be deleted");
+                    return Ok($"The {series.Name} series contains posts and cannot be deleted");
                 }
                 _unitOfWork.Series.Remove(series);
             }

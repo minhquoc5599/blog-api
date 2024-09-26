@@ -130,7 +130,8 @@ namespace Blog.Api.Controllers.Admin
                 {
                     return NotFound();
                 }
-
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                await _unitOfWork.Users.RemoveRoles(user.Id, [.. currentRoles]);
                 await _userManager.DeleteAsync(user);
             }
             return Ok();

@@ -62,7 +62,7 @@ namespace Blog.Api.Controllers.Admin
                 }
                 if (await _unitOfWork.PostCategories.CheckExistPost(id))
                 {
-                    return Ok("The category contains posts and cannot be deleted");
+                    return Ok($"The {postCategory.Name} post category contains posts and cannot be deleted");
                 }
                 _unitOfWork.PostCategories.Remove(postCategory);
             }

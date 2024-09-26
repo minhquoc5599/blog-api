@@ -4,12 +4,33 @@ namespace Blog.Core.SeedWorks.Constants
 {
     public static class Permissions
     {
+        // Display category
         public static class Dashboard
         {
             [Description("View dashboard")]
             public const string View = "Permissions.Dashboard.View";
         }
 
+        public static class System
+        {
+            [Description("View system")]
+            public const string View = "Permissions.System.View";
+        }
+
+        public static class Content
+        {
+            [Description("View content")]
+            public const string View = "Permissions.Content.View";
+        }
+
+        public static class Report
+        {
+            [Description("View report")]
+            public const string View = "Permissions.Report.View";
+        }
+
+
+        // Api
         public static class Roles
         {
             [Description("View roles")]
@@ -135,11 +156,8 @@ namespace Blog.Core.SeedWorks.Constants
             [Description("Get transactions")]
             public const string GetTransactions = "Permissions.Royalty.GetTransactions";
 
-            [Description("GetRoyaltyReport")]
+            [Description("Get royalty report")]
             public const string GetRoyaltyReport = "Permissions.Royalty.GetRoyaltyReport";
-
-            [Description("GetRoyaltyReportByMonth")]
-            public const string GetRoyaltyReportByMonth = "Permissions.Royalty.GetRoyaltyReportByMonth";
 
             [Description("Pay royalty")]
             public const string Pay = "Permissions.Royalty.Pay";

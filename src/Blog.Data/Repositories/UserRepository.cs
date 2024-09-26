@@ -2,11 +2,6 @@
 using Blog.Core.Repositories;
 using Blog.Data.SeedWorks;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Blog.Data.Repositories
 {
@@ -21,14 +16,14 @@ namespace Blog.Data.Repositories
             foreach (var role in roles)
             {
                 var checkRole = await _context.Roles.FirstOrDefaultAsync(x => x.Name == role);
-                if (checkRole != null)
+                if (checkRole == null)
                 {
                     return;
                 }
 
                 var userRole = await _context.UserRoles.FirstOrDefaultAsync(
                     x => x.RoleId == checkRole.Id && x.UserId == userId);
-                if (userRole != null)
+                if (userRole == null)
                 {
                     return;
                 }

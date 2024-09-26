@@ -4,6 +4,7 @@ using Blog.Api.Helps.Filters;
 using Blog.Core.Domain.Identity;
 using Blog.Core.Models.Base;
 using Blog.Core.Models.System;
+using Blog.Core.SeedWorks;
 using Blog.Core.SeedWorks.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,13 +18,15 @@ namespace Blog.Api.Controllers.Admin
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly RoleManager<AppRole> _roleManager;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly RoleManager<AppRole> _roleManager;
 
-        public RoleController(RoleManager<AppRole> roleManager, IMapper mapper)
+        public RoleController(IMapper mapper, IUnitOfWork unitOfWork, RoleManager<AppRole> roleManager)
         {
-            _roleManager = roleManager;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
+            _roleManager = roleManager;
         }
 
         [HttpPost]
@@ -67,7 +70,15 @@ namespace Blog.Api.Controllers.Admin
                 {
                     return NotFound();
                 }
-
+                if(await _unitOfWork.Roles.CheckExistUser(id))
+                {
+                    return BadRequest($"The {role.Name} role contains users and cannot be deleted");
+                }
+                var claims = await _roleManager.GetClaimsAsync(role);
+                foreach (var claim in claims)
+                {
+                    await _roleManager.RemoveClaimAsync(role, claim);
+                }
                 await _roleManager.DeleteAsync(role);
             }
             return Ok();
@@ -149,7 +160,7 @@ namespace Blog.Api.Controllers.Admin
         }
 
         [HttpPut("permissions")]
-        [Authorize(Permissions.Roles.Edit)]
+        [Authorize(Permissions.Roles.EditRolePermissions)]
         public async Task<IActionResult> SavePermission([FromBody] PermissionModel model)
         {
             var role = await _roleManager.FindByIdAsync(model.RoleId);

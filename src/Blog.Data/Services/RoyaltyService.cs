@@ -43,7 +43,7 @@ namespace Blog.Data.Services
                                     sum(case when p.Status = 3 then 1 else 0 end) as NumberOfPublishPosts,
                                     sum(case when p.Status = 3 and p.IsPaid = 1 then 1 else 0 end) as NumberOfPaidPublishPosts,
                                     sum(case when p.Status = 3 and p.IsPaid = 0 then 1 else 0 end) as NumberOfUnpaidPublishPosts
-                                    from Posts p join Users u on p.AuthorUserId = u.Id
+                                    from Posts p join AppUsers u on p.AuthorUserId = u.Id
                                     where (@username is null or u.UserName like '%' + @username + '%') and 
                                             p.DateCreated between @convertFromDate and DateAdd(day, 1, @convertToDate)
                                     group by 
