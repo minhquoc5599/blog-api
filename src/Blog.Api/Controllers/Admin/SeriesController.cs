@@ -26,6 +26,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.Create)]
         public async Task<IActionResult> CreateSeries([FromBody] CreateUpdateSeriesRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var series = _mapper.Map<CreateUpdateSeriesRequest, Series>(request);
             _unitOfWork.Series.Add(series);
 
@@ -37,35 +42,63 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.Edit)]
         public async Task<IActionResult> UpdateSeries(Guid id, [FromBody] CreateUpdateSeriesRequest request)
         {
+            if (request == null || id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var series = await _unitOfWork.Series.GetByIdAsync(id);
             if (series == null)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.Series);
             }
             _mapper.Map(request, series);
-            await _unitOfWork.CompleteAsync();
-            return Ok();
+
+            var result = await _unitOfWork.CompleteAsync();
+            return result >= 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
         }
 
         [HttpDelete]
         [Authorize(Permissions.Series.Delete)]
         public async Task<IActionResult> DeleteSeries([FromQuery] Guid[] ids)
         {
-            foreach (var id in ids)
+            if (ids == null || ids.Length == 0)
             {
-                var series = await _unitOfWork.Series.GetByIdAsync(id);
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (ids.Length == 1)
+            {
+                var series = await _unitOfWork.Series.GetByIdAsync(ids[0]);
                 if (series == null)
                 {
-                    return NotFound();
+                    return NotFound(StatusMessage.NotFound.Series);
                 }
-                if (await _unitOfWork.Series.CheckExistPost(id))
+                if (await _unitOfWork.Series.CheckExistPost(ids[0]))
                 {
-                    return Ok($"The {series.Name} series contains posts and cannot be deleted");
+                    return Conflict($"The {series.Name} series contains posts and cannot be deleted");
                 }
                 _unitOfWork.Series.Remove(series);
             }
+            else
+            {
+                foreach (var id in ids)
+                {
+                    var series = await _unitOfWork.Series.GetByIdAsync(id);
+                    if (series == null)
+                    {
+                        continue;
+                    }
+                    if (await _unitOfWork.Series.CheckExistPost(id))
+                    {
+                        continue;
+                    }
+                    _unitOfWork.Series.Remove(series);
+                }
+            }
+
             var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Ok() : BadRequest();
+            return result > 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
         }
 
         [HttpGet]
@@ -73,12 +106,19 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.View)]
         public async Task<ActionResult<SeriesDetailResponse>> GetSeriesById(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var series = await _unitOfWork.Series.GetByIdAsync(id);
             if (series == null)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.Role);
             }
-            return Ok(series);
+
+            var result = _mapper.Map<SeriesDetailResponse>(series);
+            return Ok(result);
         }
 
         [HttpGet]
@@ -87,6 +127,11 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<SeriesResponse>>> GetSeriesPaging(string? keyword,
             int pageIndex, int pageSize = 10)
         {
+            if (pageIndex <= 0 || pageSize <= 0)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var result = await _unitOfWork.Series.GetSeriesAsync(keyword, pageIndex, pageSize);
 
             return Ok(result);
@@ -106,10 +151,15 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.AddPostInSeries)]
         public async Task<IActionResult> AddPostSeries([FromBody] AddPostSeriesRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var isExisted = await _unitOfWork.Series.IsPostInSeries(request.SeriesId, request.PostId);
             if (isExisted)
             {
-                return Conflict("This post already exists in series");
+                return Conflict(StatusMessage.Conflict.PostInSeries);
             }
             await _unitOfWork.Series.AddPostToSeries(request.SeriesId, request.PostId, request.SortOrder);
             var result = await _unitOfWork.CompleteAsync();
@@ -121,10 +171,15 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.DeletePostInSeries)]
         public async Task<IActionResult> DeletePostSeries([FromBody] AddPostSeriesRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var isExisted = await _unitOfWork.Series.IsPostInSeries(request.SeriesId, request.PostId);
             if (!isExisted)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.PostInSeries);
             }
             await _unitOfWork.Series.RemovePostToSeries(request.SeriesId, request.PostId);
             var result = await _unitOfWork.CompleteAsync();
@@ -136,6 +191,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Series.GetPostsInSeries)]
         public async Task<ActionResult<List<PostResponse>>> GetPostsInSeries(Guid seriesId)
         {
+            if (seriesId == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var posts = await _unitOfWork.Series.GetPostsInSeries(seriesId);
             return Ok(posts);
         }

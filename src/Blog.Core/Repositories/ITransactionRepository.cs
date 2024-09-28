@@ -8,6 +8,6 @@ namespace Blog.Core.Repositories
     public interface ITransactionRepository : IRepository<Transaction, Guid>
     {
         Task<PagingResponse<TransactionResponse>> GetTransactions(string? userName,
-            string fromDate, string toDate, int pageIndex = 1, int pageSize = 10);
+            DateTime fromDate, DateTime toDate, int pageIndex = 1, int pageSize = 10);
     }
 }

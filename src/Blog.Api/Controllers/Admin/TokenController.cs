@@ -1,6 +1,7 @@
 ﻿using Blog.Api.Services;
 using Blog.Core.Domain.Identity;
 using Blog.Core.Models.Auth;
+using Blog.Core.SeedWorks.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,21 +27,22 @@ namespace Blog.Api.Controllers.Admin
         {
             if (request == null)
             {
-                return BadRequest("Bad request");
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
             }
+
             string accessToken = request.AccessToken;
             string refreshToken = request.RefreshToken;
             var principal = _token.GetFromExpiredToken(accessToken);
             if (principal == null || principal.Identity == null || principal.Identity.Name == null)
             {
-                return BadRequest("Invalid token");
+                return BadRequest(StatusMessage.BadRequest.InvalidToken);
             }
 
             var userName = principal.Identity.Name;
             var user = await _userManager.FindByNameAsync(userName);
             if (user is null || user.RefreshToken != refreshToken)
             {
-                return BadRequest("Bad request");
+                return NotFound(StatusMessage.NotFound.User);
             }
             var newAccessToken = _token.GenerateAccessToken(principal.Claims);
 

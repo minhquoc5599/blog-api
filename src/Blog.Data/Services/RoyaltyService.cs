@@ -26,7 +26,7 @@ namespace Blog.Data.Services
         }
 
         public async Task<PagingResponse<RoyaltyReportResponse>> GetRoyaltyReportAsync(string? username,
-            string fromDate, string toDate, int pageIndex = 1, int pageSize = 10)
+            DateTime fromDate, DateTime toDate, int pageIndex = 1, int pageSize = 10)
         {
             using SqlConnection connection = new(_configuration.GetConnectionString("DefaultConnection"));
             if (connection.State == ConnectionState.Closed)
@@ -45,18 +45,16 @@ namespace Blog.Data.Services
                                     sum(case when p.Status = 3 and p.IsPaid = 0 then 1 else 0 end) as NumberOfUnpaidPublishPosts
                                     from Posts p join AppUsers u on p.AuthorUserId = u.Id
                                     where (@username is null or u.UserName like '%' + @username + '%') and 
-                                            p.DateCreated between @convertFromDate and DateAdd(day, 1, @convertToDate)
+                                            p.DateCreated between @fromDate and DateAdd(day, 1, @toDate)
                                     group by 
                                     p.AuthorUserId,
                                     u.UserName";
 
-            var convertFromDate = DateTime.Parse(fromDate);
-            var convertToDate = DateTime.Parse(toDate);
             var items = await connection.QueryAsync<RoyaltyReportResponse>(coreSql, new
             {
                 username,
-                convertFromDate,
-                convertToDate
+                fromDate,
+                toDate
             }, null, 120, CommandType.Text);
             var totalRow = items.Count();
             items = items.Skip((pageIndex - 1) * pageSize).Take(pageSize);

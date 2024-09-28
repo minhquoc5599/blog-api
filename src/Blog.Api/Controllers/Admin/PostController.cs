@@ -31,9 +31,14 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.Create)]
         public async Task<ActionResult> CreatePost([FromBody] CreateUpdatePostRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
             {
-                return Conflict("Existed Slug");
+                return Conflict(StatusMessage.Conflict.Post);
             }
             var post = _mapper.Map<CreateUpdatePostRequest, Post>(request);
             var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
@@ -49,22 +54,27 @@ namespace Blog.Api.Controllers.Admin
             _unitOfWork.Posts.Add(post);
 
             var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Created() : BadRequest();
+            return result > 0 ? Created() : StatusCode(500, StatusMessage.InternalServerError);
         }
 
         [HttpPut("{id}")]
         [Authorize(Permissions.Posts.Edit)]
         public async Task<ActionResult> UpdatePost(Guid id, [FromBody] CreateUpdatePostRequest request)
         {
+            if (request == null || id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
             {
-                return Conflict("Existed Slug");
+                return Conflict(StatusMessage.Conflict.Post);
             }
 
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.Post);
             }
 
             if (post.CategoryId != request.CategoryId)
@@ -75,25 +85,44 @@ namespace Blog.Api.Controllers.Admin
                 post.CategorySlug = postCategory.Slug;
             }
             _mapper.Map(request, post);
-            await _unitOfWork.CompleteAsync();
-            return Ok();
+
+            var result = await _unitOfWork.CompleteAsync();
+            return result >= 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
         }
 
         [HttpDelete]
         [Authorize(Permissions.Posts.Delete)]
         public async Task<ActionResult> DeletePosts([FromQuery] Guid[] ids)
         {
-            foreach (var id in ids)
+            if (ids == null || ids.Length == 0)
             {
-                var post = await _unitOfWork.Posts.GetByIdAsync(id);
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (ids.Length == 1)
+            {
+                var post = await _unitOfWork.Posts.GetByIdAsync(ids[0]);
                 if (post == null)
                 {
-                    return NotFound();
+                    return NotFound(StatusMessage.NotFound.Post);
                 }
                 _unitOfWork.Posts.Remove(post);
             }
+            else
+            {
+                foreach (var id in ids)
+                {
+                    var post = await _unitOfWork.Posts.GetByIdAsync(id);
+                    if (post == null)
+                    {
+                        continue;
+                    }
+                    _unitOfWork.Posts.Remove(post);
+                }
+            }
+
             var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Ok() : BadRequest();
+            return result > 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
         }
 
         [HttpGet]
@@ -101,10 +130,15 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.View)]
         public async Task<ActionResult<PostDetailResponse>> GetPostById(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.Post);
             }
             var result = _mapper.Map<PostDetailResponse>(post);
             return Ok(result);
@@ -116,6 +150,11 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<PostResponse>>> GetPostsPaging(string? keyword, Guid? categoryId,
             int pageIndex, int pageSize = 10)
         {
+            if (pageIndex <= 0 || pageSize <= 0)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var userId = User.GetUserId();
             var result = await _unitOfWork.Posts.GetPostsAsync(keyword, userId, categoryId, pageIndex, pageSize);
             return Ok(result);
@@ -125,6 +164,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.Approve)]
         public async Task<IActionResult> ApprovePost(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             await _unitOfWork.Posts.Approve(id, User.GetUserId());
             await _unitOfWork.CompleteAsync();
             return Ok();
@@ -134,6 +178,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.SubmitForApproval)]
         public async Task<IActionResult> SendToApprove(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             await _unitOfWork.Posts.SubmitForApproval(id, User.GetUserId());
             await _unitOfWork.CompleteAsync();
             return Ok();
@@ -141,9 +190,14 @@ namespace Blog.Api.Controllers.Admin
 
         [HttpPost("reject/{id}")]
         [Authorize(Permissions.Posts.Reject)]
-        public async Task<IActionResult> RejectPost(Guid id, [FromBody] ReturnBackRequest model)
+        public async Task<IActionResult> RejectPost(Guid id, [FromBody] ReturnBackRequest request)
         {
-            await _unitOfWork.Posts.Reject(id, User.GetUserId(), model.Reason);
+            if (request == null || id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            await _unitOfWork.Posts.Reject(id, User.GetUserId(), request.Reason);
             await _unitOfWork.CompleteAsync();
             return Ok();
         }
@@ -152,6 +206,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.RejectReason)]
         public async Task<ActionResult<string>> GetRejectReason(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var note = await _unitOfWork.Posts.GetRejectReason(id);
             return Ok(note);
         }
@@ -160,6 +219,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.GetPostActivityLogs)]
         public async Task<ActionResult<List<PostActivityLogResponse>>> GetPostActivityLogs(Guid id)
         {
+            if (id == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var logs = await _unitOfWork.Posts.GetPostActivityLogsWithPostId(id);
             return Ok(logs);
         }
@@ -169,6 +233,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Posts.GetSeries)]
         public async Task<ActionResult<List<SeriesResponse>>> GetSeries(Guid postId)
         {
+            if (postId == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var result = await _unitOfWork.Posts.GetSeriesWithPostId(postId);
             return Ok(result);
         }

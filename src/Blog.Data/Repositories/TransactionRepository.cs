@@ -17,21 +17,15 @@ namespace Blog.Data.Repositories
         }
 
         public async Task<PagingResponse<TransactionResponse>> GetTransactions(string? userName,
-            string fromDate, string toDate, int pageIndex = 1, int pageSize = 10)
+            DateTime fromDate, DateTime toDate, int pageIndex = 1, int pageSize = 10)
         {
             var query = _context.Transactions.AsQueryable();
             if (!string.IsNullOrWhiteSpace(userName))
             {
-                query = query.Where(x => x.ToUserName.Contains(userName));
-            }
-            if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
-            {
-                var convertFromDate = DateTime.Parse(fromDate);
-                var convertToDate = DateTime.Parse(toDate);
-                if (convertFromDate > DateTime.MinValue && convertFromDate <= convertToDate)
-                {
-                    query = query.Where(x => x.DateCreated >= convertFromDate && x.DateCreated <= convertToDate.AddDays(1));
-                }
+                query = query.Where(x =>
+                x.ToUserName.Contains(userName) &&
+                x.DateCreated >= fromDate &&
+                x.DateCreated <= toDate.AddDays(1));
             }
 
             var totalRow = await query.CountAsync();

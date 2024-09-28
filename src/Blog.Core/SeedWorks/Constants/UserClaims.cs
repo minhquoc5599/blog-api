@@ -1,6 +1,6 @@
 ﻿namespace Blog.Core.SeedWorks.Constants
 {
-    public class UserClaims
+    public static class UserClaims
     {
         public const string Roles = "roles";
         public const string Id = "id";

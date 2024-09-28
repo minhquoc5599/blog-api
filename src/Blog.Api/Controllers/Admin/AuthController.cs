@@ -32,27 +32,28 @@ namespace Blog.Api.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<AuthenticatedResponse>> Login([FromBody] LoginRequest request)
         {
-            if (request == null)
+            if (request == null || string.IsNullOrEmpty(request.UserName) || 
+                string.IsNullOrEmpty(request.Password))
             {
-                return BadRequest("Invalid request");
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
             }
 
             var user = await _userManager.FindByNameAsync(request.UserName);
             if(user == null)
             {
-                return NotFound();
+                return NotFound(StatusMessage.NotFound.User);
             }
 
             if (user.IsActive == false || user.LockoutEnabled)
             {
-                return Unauthorized("User has been locked out");
+                return Unauthorized(StatusMessage.Unauthorized.LockedUser);
             }
 
             var result = await _signInManager.PasswordSignInAsync(request.UserName, request.Password,
                 false, true);
             if (!result.Succeeded)
             {
-                return Unauthorized("Login failed");
+                return Unauthorized(StatusMessage.Unauthorized.LoginFailed);
             }
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -63,6 +64,7 @@ namespace Blog.Api.Controllers.Admin
                 new Claim(UserClaims.Id, user.Id.ToString()),
                 new Claim(UserClaims.FirstName, user.FirstName),
                 new Claim(UserClaims.Roles, string.Join(";", roles)),
+                new Claim(UserClaims.UserName, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.UserName),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

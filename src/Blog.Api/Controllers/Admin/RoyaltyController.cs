@@ -27,7 +27,27 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<TransactionResponse>>> GetTransactions(string? keyword,
             string fromDate, string toDate, int pageIndex = 1, int pageSize = 10)
         {
-            var result = await _unitOfWork.Transactions.GetTransactions(keyword, fromDate, toDate,
+            if (string.IsNullOrEmpty(fromDate) || !DateTime.TryParse(fromDate, out DateTime convertFromDate))
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (string.IsNullOrEmpty(toDate) || !DateTime.TryParse(toDate, out DateTime convertToDate))
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (convertFromDate <= DateTime.MinValue && convertFromDate > convertToDate)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (pageIndex <= 0 || pageSize <= 0)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            var result = await _unitOfWork.Transactions.GetTransactions(keyword, convertFromDate, convertToDate,
                 pageIndex, pageSize);
             return Ok(result);
         }
@@ -38,8 +58,27 @@ namespace Blog.Api.Controllers.Admin
         public async Task<ActionResult<PagingResponse<RoyaltyReportResponse>>> GetRoyaltyReport(
             string? username, string fromDate, string toDate, int pageIndex = 1, int pageSize = 10)
         {
+            if (string.IsNullOrEmpty(fromDate) || !DateTime.TryParse(fromDate, out DateTime convertFromDate))
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
 
-            var result = await _royaltyService.GetRoyaltyReportAsync(username, fromDate, toDate,
+            if (string.IsNullOrEmpty(toDate) || !DateTime.TryParse(toDate, out DateTime convertToDate))
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (convertFromDate <= DateTime.MinValue && convertFromDate > convertToDate)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            if (pageIndex <= 0 || pageSize <= 0)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
+            var result = await _royaltyService.GetRoyaltyReportAsync(username, convertFromDate, convertToDate,
                 pageIndex, pageSize);
             return Ok(result);
         }
@@ -49,6 +88,11 @@ namespace Blog.Api.Controllers.Admin
         [Authorize(Permissions.Royalty.Pay)]
         public async Task<IActionResult> PayRoyalty(Guid userId)
         {
+            if (userId == Guid.Empty)
+            {
+                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+            }
+
             var fromUserId = User.GetUserId();
             await _royaltyService.PayRoyaltyForUserAsync(fromUserId, userId);
             return Ok();
