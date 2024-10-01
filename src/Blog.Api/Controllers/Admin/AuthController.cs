@@ -57,8 +57,8 @@ namespace Blog.Api.Controllers.Admin
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            var permissions = await this.GetPermissionsByUserIdAsync(user.Id.ToString());
-            var claims = new[]
+            var permissions = await GetPermissions(roles);
+            var accessTokenClaims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(UserClaims.Id, user.Id.ToString()),
@@ -70,11 +70,15 @@ namespace Blog.Api.Controllers.Admin
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(UserClaims.Permissions, JsonSerializer.Serialize(permissions))
             };
-            var accessToken = _token.GenerateAccessToken(claims);
-            var refreshToken = _token.GenerateRefreshToken();
+            var refreshTokenClaims = new[]
+            {
+                new Claim(UserClaims.Id, user.Id.ToString())
+            };
+            var accessToken = _token.GenerateAccessToken(accessTokenClaims);
+            var refreshToken = _token.GenerateRefreshToken(refreshTokenClaims);
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpireTime = DateTime.Now.AddDays(30);
+            //user.RefreshTokenExpireTime = DateTime.Now.AddDays(30);
             await _userManager.UpdateAsync(user);
 
             return Ok(new AuthenticatedResponse
@@ -84,10 +88,8 @@ namespace Blog.Api.Controllers.Admin
             });
         }
 
-        private async Task<List<string>> GetPermissionsByUserIdAsync(string userId)
+        private async Task<List<string>> GetPermissions(IList<string> roles)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            var roles = await _userManager.GetRolesAsync(user);
             var permissions = new List<string>();
             var allPermissions = new List<RoleClaimsDto>();
             if (roles.Contains(Roles.Admin))

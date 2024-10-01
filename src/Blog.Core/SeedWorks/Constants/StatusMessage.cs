@@ -11,7 +11,7 @@
         public static class Unauthorized
         {
             public const string LockedUser = "User has been locked out";
-            public const string LoginFailed = "Login Failed";
+            public const string LoginFailed = "Login failed";
         }
 
         public static class NotFound

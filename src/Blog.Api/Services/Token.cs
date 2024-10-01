@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Blog.Api.Services
@@ -20,7 +19,7 @@ namespace Blog.Api.Services
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtTokenSettings.Key));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-
+            
             var tokenOptions = new JwtSecurityToken(
                 issuer: _jwtTokenSettings.Issuer,
                 audience: _jwtTokenSettings.Issuer,
@@ -33,17 +32,34 @@ namespace Blog.Api.Services
             return tokenString;
         }
 
-        public string GenerateRefreshToken()
+        //public string GenerateRefreshToken()
+        //{
+        //    var randomNumber = new byte[32];
+        //    using (var rng = RandomNumberGenerator.Create())
+        //    {
+        //        rng.GetBytes(randomNumber);
+        //        return Convert.ToBase64String(randomNumber);
+        //    }
+        //}
+
+        public string GenerateRefreshToken(IEnumerable<Claim> claims)
         {
-            var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomNumber);
-                return Convert.ToBase64String(randomNumber);
-            }
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtTokenSettings.Key));
+            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+
+            var tokenOptions = new JwtSecurityToken(
+                issuer: _jwtTokenSettings.Issuer,
+                audience: _jwtTokenSettings.Issuer,
+                claims: claims,
+                expires: DateTime.Now.AddDays(30),
+                signingCredentials: signinCredentials
+                );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            return tokenString;
         }
 
-        public ClaimsPrincipal GetFromExpiredToken(string token)
+        public ClaimsPrincipal GetToken(string token)
         {
             var tokenValidatonParameters = new TokenValidationParameters
             {
