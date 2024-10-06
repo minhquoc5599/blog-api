@@ -124,15 +124,16 @@ namespace Blog.Api.Controllers.Admin
         [Route("revoke")]
         public async Task<ActionResult> Revoke()
         {
-            var user = await _userManager.FindByIdAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
             if (user is null)
             {
                 return BadRequest();
             }
             user.RefreshToken = null;
             user.RefreshTokenExpireTime = null;
-            await _userManager.UpdateAsync(user);
-            return NoContent();
+
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded ?NoContent(): StatusCode(500);
         }
 
         private async Task<List<string>> GetPermissions(IList<string> roles)

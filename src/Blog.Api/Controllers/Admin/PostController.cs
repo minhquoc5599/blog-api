@@ -66,15 +66,18 @@ namespace Blog.Api.Controllers.Admin
                 return BadRequest(StatusMessage.BadRequest.InvalidRequest);
             }
 
-            if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
-            {
-                return Conflict(StatusMessage.Conflict.Post);
-            }
-
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null)
             {
                 return NotFound(StatusMessage.NotFound.Post);
+            }
+
+            if (!request.Slug.Equals(post.Slug))
+            {
+                if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
+                {
+                    return Conflict(StatusMessage.Conflict.Post);
+                }
             }
 
             if (post.CategoryId != request.CategoryId)
