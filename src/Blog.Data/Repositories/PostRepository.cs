@@ -182,5 +182,28 @@ namespace Blog.Data.Repositories
 				.OrderByDescending(x => x.DateCreated).Take(top);
 			return await _mapper.ProjectTo<PostResponse>(query).ToListAsync();
 		}
+
+		public async Task<PagingResponse<PostResponse>> GetPostsByCategory(string category, int pageIndex = 1, int pageSize = 10)
+		{
+
+			var query = _context.Posts.AsQueryable();
+			if (!string.IsNullOrEmpty(category))
+			{
+				query = query.Where(x => x.CategorySlug.Contains(category));
+			}
+
+			var totalRow = await query.CountAsync();
+			query = query.OrderByDescending(x => x.DateCreated)
+				.Skip((pageIndex - 1) * pageSize)
+				.Take(pageSize);
+
+			return new PagingResponse<PostResponse>
+			{
+				Results = await _mapper.ProjectTo<PostResponse>(query).ToListAsync(),
+				CurrentPage = pageIndex,
+				RowCount = totalRow,
+				PageSize = pageSize
+			};
+		}
 	}
 }
