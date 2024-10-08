@@ -37,9 +37,15 @@ namespace Blog.WebApp.Controllers
 		}
 
 		[Route("post/{slug}")]
-		public IActionResult Detail(string slug)
+		public async Task<IActionResult> Detail(string slug)
 		{
-			return View();
+			var post = await _unitOfWork.Posts.GetPostBySlug(slug);
+			var category = await _unitOfWork.PostCategories.GetBySlug(post.CategorySlug);
+			return View(new PostDetailViewModel
+			{
+				Post = post,
+				Category = category
+			});
 		}
 	}
 }

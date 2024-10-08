@@ -22,5 +22,6 @@ namespace Blog.Core.Repositories
 		Task<List<PostResponse>> GetLatestPost(int top);
 		Task<PagingResponse<PostResponse>> GetPostsByCategory(string category, int pageIndex = 1,
 			int pageSize = 10);
+		Task<PostDetailResponse> GetPostBySlug(string slug);
 	}
 }

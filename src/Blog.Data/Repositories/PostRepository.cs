@@ -175,6 +175,8 @@ namespace Blog.Data.Repositories
 				.ToListAsync();
 		}
 
+
+		// Published Post
 		public async Task<List<PostResponse>> GetLatestPost(int top)
 		{
 			var query = _context.Posts
@@ -189,7 +191,7 @@ namespace Blog.Data.Repositories
 			var query = _context.Posts.AsQueryable();
 			if (!string.IsNullOrEmpty(category))
 			{
-				query = query.Where(x => x.CategorySlug.Contains(category));
+				query = query.Where(x => x.CategorySlug.Contains(category) && x.Status == PostStatus.Published);
 			}
 
 			var totalRow = await query.CountAsync();
@@ -204,6 +206,16 @@ namespace Blog.Data.Repositories
 				RowCount = totalRow,
 				PageSize = pageSize
 			};
+		}
+
+		public async Task<PostDetailResponse> GetPostBySlug(string slug)
+		{
+			var post = await _context.Posts.FirstOrDefaultAsync(x => x.Slug == slug && x.Status == PostStatus.Published);
+			if (post == null)
+			{
+				throw new Exception($"Cannot find post with slug: {slug}");
+			}
+			return _mapper.Map<PostDetailResponse>(post);
 		}
 	}
 }
