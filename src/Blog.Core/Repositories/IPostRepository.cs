@@ -19,5 +19,6 @@ namespace Blog.Core.Repositories
         Task<bool> HasPublished(Guid id);
         Task<List<PostActivityLogResponse>> GetPostActivityLogsWithPostId(Guid id);
         Task<List<Post>> GetListUnpaidPublishPosts(Guid userId);
+        Task<List<PostResponse>> GetLatestPost(int top);
     }
 }
