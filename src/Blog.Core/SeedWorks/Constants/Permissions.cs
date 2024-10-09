@@ -125,7 +125,13 @@ namespace Blog.Core.SeedWorks.Constants
 
             [Description("Get series")]
             public const string GetSeries = "Permissions.Posts.GetSeries";
-        }
+
+            [Description("Get tags")]
+            public const string GetTags = "Permissions.Posts.GetTags";
+
+			[Description("Get tags")]
+			public const string GetTagsByPostId = "Permissions.Posts.GetTagsByPostId";
+		}
 
         public static class Series
         {

@@ -23,5 +23,8 @@ namespace Blog.Core.Repositories
 		Task<PagingResponse<PostResponse>> GetPostsByCategory(string category, int pageIndex = 1,
 			int pageSize = 10);
 		Task<PostDetailResponse> GetPostBySlug(string slug);
+		Task<List<string>> GetTags();
+		Task AddTagToPost(Guid postId, Guid tagId);
+		Task<List<string>> GetTagsByPostId(Guid postId);
 	}
 }

@@ -12,237 +12,302 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.Api.Controllers.Admin
 {
-    [Route("api/admin/post")]
-    [ApiController]
-    public class PostController : ControllerBase
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly UserManager<AppUser> _userManager;
+	[Route("api/admin/post")]
+	[ApiController]
+	public class PostController : ControllerBase
+	{
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IMapper _mapper;
+		private readonly UserManager<AppUser> _userManager;
 
-        public PostController(IUnitOfWork unitOfWork, IMapper mapper, UserManager<AppUser> userManager)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _userManager = userManager;
-        }
+		public PostController(IUnitOfWork unitOfWork, IMapper mapper, UserManager<AppUser> userManager)
+		{
+			_unitOfWork = unitOfWork;
+			_mapper = mapper;
+			_userManager = userManager;
+		}
 
-        [HttpPost]
-        [Authorize(Permissions.Posts.Create)]
-        public async Task<ActionResult> CreatePost([FromBody] CreateUpdatePostRequest request)
-        {
-            if (request == null)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpPost]
+		[Authorize(Permissions.Posts.Create)]
+		public async Task<ActionResult> CreatePost([FromBody] CreateUpdatePostRequest request)
+		{
+			if (request == null)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
-            {
-                return Conflict(StatusMessage.Conflict.Post);
-            }
-            var post = _mapper.Map<CreateUpdatePostRequest, Post>(request);
-            var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
-            post.CategoryId = postCategory.Id;
-            post.CategoryName = postCategory.Name;
-            post.CategorySlug = postCategory.Slug;
+			if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
+			{
+				return Conflict(StatusMessage.Conflict.Post);
+			}
+			var post = _mapper.Map<CreateUpdatePostRequest, Post>(request);
+			var postId = new Guid();
 
-            var userId = User.GetUserId();
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            post.AuthorUserId = userId;
-            post.AuthorName = user.GetFullName();
-            post.AuthorUserName = user.UserName;
-            _unitOfWork.Posts.Add(post);
+			var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
+			post.Id = postId;
+			post.CategoryId = postCategory.Id;
+			post.CategoryName = postCategory.Name;
+			post.CategorySlug = postCategory.Slug;
 
-            var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Created() : StatusCode(500, StatusMessage.InternalServerError);
-        }
+			var userId = User.GetUserId();
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+			post.AuthorUserId = userId;
+			post.AuthorName = user.GetFullName();
+			post.AuthorUserName = user.UserName;
+			_unitOfWork.Posts.Add(post);
 
-        [HttpPut("{id}")]
-        [Authorize(Permissions.Posts.Edit)]
-        public async Task<ActionResult> UpdatePost(Guid id, [FromBody] CreateUpdatePostRequest request)
-        {
-            if (request == null || id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+			// Tag
+			if (request.Tags != null && request.Tags.Length > 0)
+			{
+				foreach (var item in request.Tags)
+				{
+					var tagslug = TextExtension.ToUnsignedString(item);
+					var tag = await _unitOfWork.Tags.GetTagBySlug(tagslug);
+					Guid tagId;
+					if (tag == null)
+					{
+						tagId = Guid.NewGuid();
+						_unitOfWork.Tags.Add(new Tag { Id = tagId, Name = item, Slug = tagslug });
+					}
+					else
+					{
+						tagId = tag.Id;
+					}
+					await _unitOfWork.Posts.AddTagToPost(postId, tagId);
+				}
+			}
 
-            var post = await _unitOfWork.Posts.GetByIdAsync(id);
-            if (post == null)
-            {
-                return NotFound(StatusMessage.NotFound.Post);
-            }
+			var result = await _unitOfWork.CompleteAsync();
+			return result > 0 ? Created() : StatusCode(500, StatusMessage.InternalServerError);
+		}
 
-            if (!request.Slug.Equals(post.Slug))
-            {
-                if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
-                {
-                    return Conflict(StatusMessage.Conflict.Post);
-                }
-            }
+		[HttpPut("{id}")]
+		[Authorize(Permissions.Posts.Edit)]
+		public async Task<ActionResult> UpdatePost(Guid id, [FromBody] CreateUpdatePostRequest request)
+		{
+			if (request == null || id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            if (post.CategoryId != request.CategoryId)
-            {
-                var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
-                post.CategoryId = postCategory.Id;
-                post.CategoryName = postCategory.Name;
-                post.CategorySlug = postCategory.Slug;
-            }
-            _mapper.Map(request, post);
+			var post = await _unitOfWork.Posts.GetByIdAsync(id);
+			if (post == null)
+			{
+				return NotFound(StatusMessage.NotFound.Post);
+			}
 
-            var result = await _unitOfWork.CompleteAsync();
-            return result >= 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
-        }
+			if (!request.Slug.Equals(post.Slug))
+			{
+				if (await _unitOfWork.Posts.IsSlugAlreadyExisted(request.Slug))
+				{
+					return Conflict(StatusMessage.Conflict.Post);
+				}
+			}
 
-        [HttpDelete]
-        [Authorize(Permissions.Posts.Delete)]
-        public async Task<ActionResult> DeletePosts([FromQuery] Guid[] ids)
-        {
-            if (ids == null || ids.Length == 0)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+			if (post.CategoryId != request.CategoryId)
+			{
+				var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(request.CategoryId);
+				post.CategoryId = postCategory.Id;
+				post.CategoryName = postCategory.Name;
+				post.CategorySlug = postCategory.Slug;
+			}
+			_mapper.Map(request, post);
 
-            if (ids.Length == 1)
-            {
-                var post = await _unitOfWork.Posts.GetByIdAsync(ids[0]);
-                if (post == null)
-                {
-                    return NotFound(StatusMessage.NotFound.Post);
-                }
-                _unitOfWork.Posts.Remove(post);
-            }
-            else
-            {
-                foreach (var id in ids)
-                {
-                    var post = await _unitOfWork.Posts.GetByIdAsync(id);
-                    if (post == null)
-                    {
-                        continue;
-                    }
-                    _unitOfWork.Posts.Remove(post);
-                }
-            }
+			// Tag
+			if (request.Tags != null && request.Tags.Length > 0)
+			{
+				foreach (var item in request.Tags)
+				{
+					var tagslug = TextExtension.ToUnsignedString(item);
+					var tag = await _unitOfWork.Tags.GetTagBySlug(tagslug);
+					Guid tagId;
+					if (tag == null)
+					{
+						tagId = Guid.NewGuid();
+						_unitOfWork.Tags.Add(new Tag { Id = tagId, Name = item, Slug = tagslug });
+					}
+					else
+					{
+						tagId = tag.Id;
+					}
+					await _unitOfWork.Posts.AddTagToPost(id, tagId);
+				}
+			}
+			var result = await _unitOfWork.CompleteAsync();
+			return result >= 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
+		}
 
-            var result = await _unitOfWork.CompleteAsync();
-            return result > 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
-        }
+		[HttpDelete]
+		[Authorize(Permissions.Posts.Delete)]
+		public async Task<ActionResult> DeletePosts([FromQuery] Guid[] ids)
+		{
+			if (ids == null || ids.Length == 0)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-        [HttpGet]
-        [Route("{id}")]
-        [Authorize(Permissions.Posts.View)]
-        public async Task<ActionResult<PostDetailResponse>> GetPostById(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+			if (ids.Length == 1)
+			{
+				var post = await _unitOfWork.Posts.GetByIdAsync(ids[0]);
+				if (post == null)
+				{
+					return NotFound(StatusMessage.NotFound.Post);
+				}
+				_unitOfWork.Posts.Remove(post);
+			}
+			else
+			{
+				foreach (var id in ids)
+				{
+					var post = await _unitOfWork.Posts.GetByIdAsync(id);
+					if (post == null)
+					{
+						continue;
+					}
+					_unitOfWork.Posts.Remove(post);
+				}
+			}
 
-            var post = await _unitOfWork.Posts.GetByIdAsync(id);
-            if (post == null)
-            {
-                return NotFound(StatusMessage.NotFound.Post);
-            }
-            var result = _mapper.Map<PostDetailResponse>(post);
-            return Ok(result);
-        }
+			var result = await _unitOfWork.CompleteAsync();
+			return result > 0 ? Ok() : StatusCode(500, StatusMessage.InternalServerError);
+		}
 
-        [HttpGet]
-        [Route("paging")]
-        [Authorize(Permissions.Posts.View)]
-        public async Task<ActionResult<PagingResponse<PostResponse>>> GetPostsPaging(string? keyword, Guid? categoryId,
-            int pageIndex, int pageSize = 10)
-        {
-            if (pageIndex <= 0 || pageSize <= 0)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet]
+		[Route("{id}")]
+		[Authorize(Permissions.Posts.View)]
+		public async Task<ActionResult<PostDetailResponse>> GetPostById(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            var userId = User.GetUserId();
-            var result = await _unitOfWork.Posts.GetPostsAsync(keyword, userId, categoryId, pageIndex, pageSize);
-            return Ok(result);
-        }
+			var post = await _unitOfWork.Posts.GetByIdAsync(id);
+			if (post == null)
+			{
+				return NotFound(StatusMessage.NotFound.Post);
+			}
+			var result = _mapper.Map<PostDetailResponse>(post);
+			return Ok(result);
+		}
 
-        [HttpGet("approve/{id}")]
-        [Authorize(Permissions.Posts.Approve)]
-        public async Task<IActionResult> ApprovePost(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet]
+		[Route("paging")]
+		[Authorize(Permissions.Posts.View)]
+		public async Task<ActionResult<PagingResponse<PostResponse>>> GetPostsPaging(string? keyword, Guid? categoryId,
+			int pageIndex, int pageSize = 10)
+		{
+			if (pageIndex <= 0 || pageSize <= 0)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            await _unitOfWork.Posts.Approve(id, User.GetUserId());
-            await _unitOfWork.CompleteAsync();
-            return Ok();
-        }
+			var userId = User.GetUserId();
+			var result = await _unitOfWork.Posts.GetPostsAsync(keyword, userId, categoryId, pageIndex, pageSize);
+			return Ok(result);
+		}
 
-        [HttpGet("approval-submit/{id}")]
-        [Authorize(Permissions.Posts.SubmitForApproval)]
-        public async Task<IActionResult> SendToApprove(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet("approve/{id}")]
+		[Authorize(Permissions.Posts.Approve)]
+		public async Task<IActionResult> ApprovePost(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            await _unitOfWork.Posts.SubmitForApproval(id, User.GetUserId());
-            await _unitOfWork.CompleteAsync();
-            return Ok();
-        }
+			await _unitOfWork.Posts.Approve(id, User.GetUserId());
+			await _unitOfWork.CompleteAsync();
+			return Ok();
+		}
 
-        [HttpPost("reject/{id}")]
-        [Authorize(Permissions.Posts.Reject)]
-        public async Task<IActionResult> RejectPost(Guid id, [FromBody] ReturnBackRequest request)
-        {
-            if (request == null || id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet("approval-submit/{id}")]
+		[Authorize(Permissions.Posts.SubmitForApproval)]
+		public async Task<IActionResult> SendToApprove(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            await _unitOfWork.Posts.Reject(id, User.GetUserId(), request.Reason);
-            await _unitOfWork.CompleteAsync();
-            return Ok();
-        }
+			await _unitOfWork.Posts.SubmitForApproval(id, User.GetUserId());
+			await _unitOfWork.CompleteAsync();
+			return Ok();
+		}
 
-        [HttpGet("reject-reason/{id}")]
-        [Authorize(Permissions.Posts.RejectReason)]
-        public async Task<ActionResult<string>> GetRejectReason(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpPost("reject/{id}")]
+		[Authorize(Permissions.Posts.Reject)]
+		public async Task<IActionResult> RejectPost(Guid id, [FromBody] ReturnBackRequest request)
+		{
+			if (request == null || id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            var note = await _unitOfWork.Posts.GetRejectReason(id);
-            return Ok(note);
-        }
+			await _unitOfWork.Posts.Reject(id, User.GetUserId(), request.Reason);
+			await _unitOfWork.CompleteAsync();
+			return Ok();
+		}
 
-        [HttpGet("post-activity-logs/{id}")]
-        [Authorize(Permissions.Posts.GetPostActivityLogs)]
-        public async Task<ActionResult<List<PostActivityLogResponse>>> GetPostActivityLogs(Guid id)
-        {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet("reject-reason/{id}")]
+		[Authorize(Permissions.Posts.RejectReason)]
+		public async Task<ActionResult<string>> GetRejectReason(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            var logs = await _unitOfWork.Posts.GetPostActivityLogsWithPostId(id);
-            return Ok(logs);
-        }
+			var note = await _unitOfWork.Posts.GetRejectReason(id);
+			return Ok(note);
+		}
 
-        [HttpGet]
-        [Route("series/{postId}")]
-        [Authorize(Permissions.Posts.GetSeries)]
-        public async Task<ActionResult<List<SeriesResponse>>> GetSeries(Guid postId)
-        {
-            if (postId == Guid.Empty)
-            {
-                return BadRequest(StatusMessage.BadRequest.InvalidRequest);
-            }
+		[HttpGet("post-activity-logs/{id}")]
+		[Authorize(Permissions.Posts.GetPostActivityLogs)]
+		public async Task<ActionResult<List<PostActivityLogResponse>>> GetPostActivityLogs(Guid id)
+		{
+			if (id == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
 
-            var result = await _unitOfWork.Posts.GetSeriesWithPostId(postId);
-            return Ok(result);
-        }
-    }
+			var logs = await _unitOfWork.Posts.GetPostActivityLogsWithPostId(id);
+			return Ok(logs);
+		}
+
+		[HttpGet]
+		[Route("series/{postId}")]
+		[Authorize(Permissions.Posts.GetSeries)]
+		public async Task<ActionResult<List<SeriesResponse>>> GetSeries(Guid postId)
+		{
+			if (postId == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
+
+			var result = await _unitOfWork.Posts.GetSeriesWithPostId(postId);
+			return Ok(result);
+		}
+
+		[HttpGet("tags")]
+		[Authorize(Permissions.Posts.GetTags)]
+		public async Task<ActionResult<List<string>>> GetTags()
+		{
+			var tags = await _unitOfWork.Posts.GetTags();
+			return Ok(tags);
+		}
+
+		[HttpGet("tags/{postId}")]
+		[Authorize(Permissions.Posts.GetTagsByPostId)]
+		public async Task<ActionResult<List<string>>> GetTagsByPostId(Guid postId)
+		{
+			if(postId == Guid.Empty)
+			{
+				return BadRequest(StatusMessage.BadRequest.InvalidRequest);
+			}
+
+			var tags = await _unitOfWork.Posts.GetTagsByPostId(postId);
+			return Ok(tags);
+		}
+	}
 }

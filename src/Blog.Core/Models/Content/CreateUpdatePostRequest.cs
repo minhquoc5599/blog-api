@@ -9,7 +9,7 @@ namespace Blog.Core.Models.Content
         public Guid CategoryId { get; set; }
         public string? Content { get; set; }
         public string? Source { get; set; }
-        public string? Tags { get; set; }
+        public string[] Tags { get; set; }
         public string? SeoDescription { get; set; }
         public required string Name { get; set; }
         public required string Slug { get; set; }
