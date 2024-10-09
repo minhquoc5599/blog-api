@@ -19,7 +19,7 @@
 						@foreach (var item in Model)
 						{
 							<li class="nav-item">
-								<a class="dropdown-item"
+								<a class="dropdown-item nav-link"
 								   title="@item.Name"
 								   href="@string.Format(@AppUrl.PostByCategory, item.Slug)">@item.Name</a>
 							</li>
@@ -27,6 +27,8 @@
 					</ul>
 				</li>
 				<li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="@AppUrl.Contact">Contact</a></li>
+				<li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="@AppUrl.Login">Login</a></li>
+				<li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="@AppUrl.Register">Register</a></li>
 			</ul>
 		</div>
 	</div>

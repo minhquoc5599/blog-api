@@ -259,7 +259,7 @@ namespace Blog.Data.Repositories
 			var query = from p in _context.Posts
 						join pt in _context.PostTags on p.Id equals pt.PostId
 						join t in _context.Tags on pt.TagId equals t.Id
-						where t.Slug == tag
+						where t.Slug == tag && p.Status == PostStatus.Published
 						select p;
 
 			var totalRow = await query.CountAsync();

@@ -89,7 +89,7 @@ namespace Blog.Data.Repositories
 			var query = from pis in _context.PostInSeries
 						join p in _context.Posts on pis.PostId equals p.Id
 						join s in _context.Series on pis.SeriesId equals s.Id
-						where s.Slug == slug
+						where s.Slug == slug && p.Status == PostStatus.Published
 						select p;
 
 			var totalRow = await query.CountAsync();
