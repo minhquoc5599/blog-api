@@ -23,11 +23,13 @@ namespace Blog.WebApp.Controllers
 		{
 			var posts = await _unitOfWork.Posts.GetPostsByCategory(categorySlug, page, 1);
 			var category = await _unitOfWork.PostCategories.GetBySlug(categorySlug);
-			return View(new PostListByCategoryViewModel
+
+			var viewModel = new PostListByCategoryViewModel
 			{
 				Category = category,
 				Posts = posts
-			});
+			};
+			return View(viewModel);
 		}
 
 		[Route("tag/{tagSlug}")]
@@ -35,11 +37,13 @@ namespace Blog.WebApp.Controllers
 		{
 			var posts = await _unitOfWork.Posts.GetPostsByTag(tagSlug, page, 1);
 			var tag = await _unitOfWork.Tags.GetTagBySlug(tagSlug);
-			return View(new PostListByTagViewModel
+
+			var viewModel = new PostListByTagViewModel
 			{
 				Tag = tag,
 				Posts = posts
-			});
+			};
+			return View(viewModel);
 		}
 
 		[Route("post/{slug}")]
@@ -48,12 +52,14 @@ namespace Blog.WebApp.Controllers
 			var post = await _unitOfWork.Posts.GetPostBySlug(slug);
 			var category = await _unitOfWork.PostCategories.GetBySlug(post.CategorySlug);
 			var tags = await _unitOfWork.Posts.GetDetailTagsByPostId(post.Id);
-			return View(new PostDetailViewModel
+
+			var viewModel = new PostDetailViewModel
 			{
 				Post = post,
 				Category = category,
 				Tags = tags
-			});
+			};
+			return View(viewModel);
 		}
 	}
 }

@@ -11,8 +11,9 @@ namespace Blog.Core.Repositories
         Task AddPostToSeries(Guid seriesId, Guid postId, int sortOrder);
         Task RemovePostToSeries(Guid seriesId, Guid postId);
         Task<List<PostResponse>> GetPostsInSeries(Guid seriesId);
-        Task<bool> IsPostInSeries(Guid seriesId, Guid postId);
+		Task<bool> IsPostInSeries(Guid seriesId, Guid postId);
         Task<bool> CheckExistPost(Guid seriesId);
-
-    }
+		Task<SeriesResponse> GetSeriesBySlug(string slug);
+		Task<PagingResponse<PostResponse>> GetPostsInSeries(string slug, int pageIndex = 1, int pageSize = 10);
+	}
 }
