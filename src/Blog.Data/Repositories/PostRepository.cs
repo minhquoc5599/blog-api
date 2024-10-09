@@ -185,9 +185,9 @@ namespace Blog.Data.Repositories
 			return await _mapper.ProjectTo<PostResponse>(query).ToListAsync();
 		}
 
-		public async Task<PagingResponse<PostResponse>> GetPostsByCategory(string category, int pageIndex = 1, int pageSize = 10)
+		public async Task<PagingResponse<PostResponse>> GetPostsByCategory(string category, int pageIndex = 1,
+			int pageSize = 10)
 		{
-
 			var query = _context.Posts.AsQueryable();
 			if (!string.IsNullOrEmpty(category))
 			{
@@ -241,6 +241,39 @@ namespace Blog.Data.Repositories
 						where post.Id == postId
 						select t.Name;
 			return await query.ToListAsync();
+		}
+
+		public async Task<List<TagResponse>> GetDetailTagsByPostId(Guid postId)
+		{
+			var query = from post in _context.Posts
+						join pt in _context.PostTags on post.Id equals pt.PostId
+						join t in _context.Tags on pt.TagId equals t.Id
+						where pt.PostId == postId
+						select t;
+			return await _mapper.ProjectTo<TagResponse>(query).ToListAsync();
+		}
+
+		public async Task<PagingResponse<PostResponse>> GetPostsByTag(string tag, int pageIndex = 1,
+			int pageSize = 10)
+		{
+			var query = from p in _context.Posts
+						join pt in _context.PostTags on p.Id equals pt.PostId
+						join t in _context.Tags on pt.TagId equals t.Id
+						where t.Slug == tag
+						select p;
+
+			var totalRow = await query.CountAsync();
+			query = query.OrderByDescending(x => x.DateCreated)
+				.Skip((pageIndex - 1) * pageSize)
+				.Take(pageSize);
+
+			return new PagingResponse<PostResponse>
+			{
+				Results = await _mapper.ProjectTo<PostResponse>(query).ToListAsync(),
+				CurrentPage = pageIndex,
+				RowCount = totalRow,
+				PageSize = pageSize
+			};
 		}
 	}
 }

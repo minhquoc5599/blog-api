@@ -26,5 +26,7 @@ namespace Blog.Core.Repositories
 		Task<List<string>> GetTags();
 		Task AddTagToPost(Guid postId, Guid tagId);
 		Task<List<string>> GetTagsByPostId(Guid postId);
+		Task<List<TagResponse>> GetDetailTagsByPostId(Guid postId);
+		Task<PagingResponse<PostResponse>> GetPostsByTag(string tag, int pageIndex = 1, int pageSize = 10);
 	}
 }

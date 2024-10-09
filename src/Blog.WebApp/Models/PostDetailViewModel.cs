@@ -6,5 +6,6 @@ namespace Blog.WebApp.Models
     {
         public PostDetailResponse Post { get; set; }
         public PostCategoryResponse Category { get; set; }
+        public List<TagResponse> Tags { get; set; }
     }
 }

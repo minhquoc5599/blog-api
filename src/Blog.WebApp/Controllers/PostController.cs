@@ -30,10 +30,16 @@ namespace Blog.WebApp.Controllers
 			});
 		}
 
-		[Route("tag/{tag}")]
-		public IActionResult ListByTag([FromRoute] string tag, [FromQuery] int? page = 1)
+		[Route("tag/{tagSlug}")]
+		public async Task<IActionResult> ListByTag([FromRoute] string tagSlug, [FromQuery] int page = 1)
 		{
-			return View();
+			var posts = await _unitOfWork.Posts.GetPostsByTag(tagSlug, page, 1);
+			var tag = await _unitOfWork.Tags.GetTagBySlug(tagSlug);
+			return View(new PostListByTagViewModel
+			{
+				Tag = tag,
+				Posts = posts
+			});
 		}
 
 		[Route("post/{slug}")]
@@ -41,10 +47,12 @@ namespace Blog.WebApp.Controllers
 		{
 			var post = await _unitOfWork.Posts.GetPostBySlug(slug);
 			var category = await _unitOfWork.PostCategories.GetBySlug(post.CategorySlug);
+			var tags = await _unitOfWork.Posts.GetDetailTagsByPostId(post.Id);
 			return View(new PostDetailViewModel
 			{
 				Post = post,
-				Category = category
+				Category = category,
+				Tags = tags
 			});
 		}
 	}
