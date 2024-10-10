@@ -105,7 +105,7 @@ namespace Blog.WebApp.Controllers
 			{
 				await _signInManager.SignInAsync(user, false);
 				await _mediator.Publish(new LoginEvent(user.UserName));
-				return Redirect(AppUrl.Profile);
+				return Redirect(AppUrl.Home);
 			}
 			else
 			{

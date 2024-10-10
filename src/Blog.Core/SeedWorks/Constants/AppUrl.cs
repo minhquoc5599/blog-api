@@ -6,6 +6,7 @@
 		public static string Login = "/login";
 		public static string Register = "/register";
 		public static string Profile = "/profile";
+		public static string EditProfile = "/profile/edit";
 		public static string ChangePassword = "/change-password";
 
 		// Page

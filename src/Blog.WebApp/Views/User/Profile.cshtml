@@ -1,0 +1,61 @@
+﻿@{
+	ViewData["Title"] = "Profile " + Model.FirstName;
+	ViewData["Description"] = "Profile";
+}
+@inject IOptions<AppSettings> _config
+@model ProfileViewModel
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
+	<div class="container position-relative px-4 px-lg-5">
+		<div class="row gx-4 gx-lg-5 justify-content-center">
+			<div class="col-md-10 col-lg-8 col-xl-7">
+				<div class="site-heading">
+					<h1>@Model.UserName</h1>
+					<span class="subheading">@Model.Email</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+	<div class="row gx-4 gx-lg-5 justify-content-center">
+		<div class="col-md-10 col-lg-8 col-xl-7">
+			<div class="row">
+				<div class="card mb-4">
+					<div class="card-body">
+						<div class="row">
+							<div class="col-sm-4">
+								<p class="mb-0">Full Name</p>
+							</div>
+							<div class="col-sm-8">
+								<p class="text-muted mb-0">@Model.FullName</p>
+							</div>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-sm-4">
+								<p class="mb-0">Email</p>
+							</div>
+							<div class="col-sm-8">
+								<p class="text-muted mb-0">@Model.Email</p>
+							</div>
+						</div>
+						<hr>
+						<div class="row">
+							<div class="col-sm-4">
+								<p class="mb-0">UserName</p>
+							</div>
+							<div class="col-sm-8">
+								<p class="text-muted mb-0">@Model.UserName</p>
+							</div>
+						</div>
+						
+					</div>
+					<div class="d-flex justify-content-center mb-2">
+						<a type="button" class="btn btn-primary" href="@AppUrl.EditProfile">Edit</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
