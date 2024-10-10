@@ -7,6 +7,7 @@ using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
 using Blog.WebApp.Helpers;
 using Blog.WebApp.Helpers.Events.Login;
+using Blog.WebApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ builder.Services.AddControllersWithViews();
 
 
 builder.Services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+builder.Services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
 // Config DBContext and ASP.NET Core Identity
 builder.Services.AddDbContext<BlogContext>(options => options.UseSqlServer(connectionString));
@@ -55,6 +57,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Add services to the container.
 builder.Services.AddScoped(typeof(IRepository<,>), typeof(RepositoryBase<,>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Business services and repositories
 var services = typeof(PostRepository).Assembly.GetTypes()

@@ -2,7 +2,6 @@
 	ViewData["Title"] = "Edit profile";
 	ViewData["Description"] = "Edit profile";
 }
-@inject IOptions<AppSettings> _config
 @model EditProfileViewModel
 <!-- Page Header-->
 <header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
@@ -23,9 +22,9 @@
 			<form asp-action="EditProfile" asp-controller="User" method="post" class="row g-3">
 				<div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
 
-				@if (TempData["Success"] != null)
+				@if (TempData[AppConstant.SuccessFormMessage] != null)
 				{
-					<div class="alert alert-success">@TempData["Success"]</div>
+					<div class="alert alert-success">@TempData[AppConstant.SuccessFormMessage]</div>
 				}
 
 				<div class="col-md-4">

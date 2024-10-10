@@ -7,7 +7,9 @@
 		public static string Register = "/register";
 		public static string Profile = "/profile";
 		public static string EditProfile = "/profile/edit";
-		public static string ChangePassword = "/change-password";
+		public static string ChangePassword = "/profile/change-password";
+		public static string ForgotPassword = "/forgot-password";
+		public static string ResetPassword = "/reset-password";
 
 		// Page
 		public static string Home = "/";

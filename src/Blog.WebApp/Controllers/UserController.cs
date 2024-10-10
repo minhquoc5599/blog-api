@@ -1,6 +1,7 @@
 ﻿using Blog.Core.Domain.Identity;
 using Blog.Core.SeedWorks;
 using Blog.Core.SeedWorks.Constants;
+using Blog.WebApp.Helpers.Constants;
 using Blog.WebApp.Helpers.Extensions;
 using Blog.WebApp.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -55,8 +56,13 @@ namespace Blog.WebApp.Controllers
 
 		[HttpPost]
 		[Route("profile/edit")]
+		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditProfile([FromForm] EditProfileViewModel model)
 		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
 			var userId = User.GetUserId();
 			var user = await _userManager.FindByIdAsync(userId.ToString());
 			user.FirstName = model.FirstName;
@@ -64,11 +70,55 @@ namespace Blog.WebApp.Controllers
 			var result = await _userManager.UpdateAsync(user);
 			if (result.Succeeded)
 			{
-				TempData["Success"] = "Update profile successfully.";
+				TempData[AppConstant.SuccessFormMessage] = "Update profile successfully.";
+				return Redirect(AppUrl.Profile);
 			}
 			else
 			{
 				ModelState.AddModelError(string.Empty, "Update profile failed");
+			}
+			return View(model);
+		}
+
+		[HttpGet]
+		[Route("profile/change-password")]
+		public IActionResult ChangePassword()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[Route("profile/change-password")]
+		[ValidateAntiForgeryToken]
+		public async  Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				ModelState.AddModelError(string.Empty, "Invalid");
+				return View(model);
+			}
+
+			var userId = User.GetUserId();
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+
+			var checkOldPassword = await _userManager.CheckPasswordAsync(user, model.OldPassword);
+			if (!checkOldPassword)
+			{
+				ModelState.AddModelError(string.Empty, "Old password is not correct");
+				return View(model);
+			}
+
+			var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.ConfirmPassword);
+			if (result.Succeeded)
+			{
+				await _signInManager.RefreshSignInAsync(user);
+				TempData[AppConstant.SuccessFormMessage] = "Change password successfully";
+				return Redirect(AppUrl.Profile);
+			}
+
+			foreach (var error in result.Errors)
+			{
+				ModelState.AddModelError(string.Empty, error.Description);
 			}
 			return View(model);
 		}
