@@ -1,7 +1,9 @@
-﻿using Azure.Core;
-using Blog.Core.Domain.Identity;
+﻿using Blog.Core.Domain.Identity;
 using Blog.Core.SeedWorks.Constants;
+using Blog.WebApp.Helpers.Events.Login;
+using Blog.WebApp.Helpers.Events.Register;
 using Blog.WebApp.Models;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +14,13 @@ namespace Blog.WebApp.Controllers
 	{
 		private readonly UserManager<AppUser> _userManager;
 		private readonly SignInManager<AppUser> _signInManager;
-		public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+		private readonly IMediator _mediator;
+		public AuthController(UserManager<AppUser> userManager, 
+			SignInManager<AppUser> signInManager, IMediator mediator)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
+			_mediator = mediator;
 		}
 
 		[HttpGet]
@@ -58,6 +63,7 @@ namespace Blog.WebApp.Controllers
 			{
 				var user = await _userManager.FindByNameAsync(model.UserName);
 				await _signInManager.SignInAsync(user, true);
+				await _mediator.Publish(new RegisterEvent(user.UserName));
 				return Redirect(AppUrl.Profile);
 			}
 			else
@@ -66,6 +72,44 @@ namespace Blog.WebApp.Controllers
 				{
 					ModelState.AddModelError(string.Empty, error.Description);
 				}
+			}
+			return View();
+		}
+
+		[HttpGet]
+		[Route("login")]
+		public IActionResult Login()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[AllowAnonymous]
+		[ValidateAntiForgeryToken]
+		[Route("login")]
+		public async Task<IActionResult> Login([FromForm] LoginViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View();
+			}
+			var user = await _userManager.FindByNameAsync(model.UserName);
+			if (user == null)
+			{
+				ModelState.AddModelError(string.Empty, "User has not registered");
+				return View();
+			}
+
+			var result = await _signInManager.PasswordSignInAsync(user, model.Password, true, true);
+			if (result.Succeeded)
+			{
+				await _signInManager.SignInAsync(user, false);
+				await _mediator.Publish(new LoginEvent(user.UserName));
+				return Redirect(AppUrl.Profile);
+			}
+			else
+			{
+				ModelState.AddModelError(string.Empty, "Login failed");
 			}
 			return View();
 		}

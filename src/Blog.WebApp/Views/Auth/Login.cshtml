@@ -1,0 +1,53 @@
+﻿@{
+	ViewData["Title"] = "Login";
+	ViewData["Description"] = "Login";
+}
+@inject IOptions<AppSettings> _config
+@model LoginViewModel
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
+	<div class="container position-relative px-4 px-lg-5">
+		<div class="row gx-4 gx-lg-5 justify-content-center">
+			<div class="col-md-10 col-lg-8 col-xl-7">
+				<div class="site-heading">
+					<h1>Login</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+	<div class="row gx-4 gx-lg-5 justify-content-center">
+		<div class="col-md-10 col-lg-8 col-xl-7">
+			<form asp-action="Login" asp-controller="Auth" method="post" class="row g-3">
+				<div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
+
+				<div class="col-md-6">
+					<label for="userName" class="form-label">User name</label>
+					<input type="text" class="form-control" asp-for="UserName" id="userName" required>
+					<span asp-validation-for="UserName" class="invalid-feedback"></span>
+				</div>
+
+				<div class="col-md-6">
+					<label for="password" class="form-label">Password</label>
+					<input type="password" class="form-control" asp-for="Password" id="password" required>
+					<span asp-validation-for="Password" class="invalid-feedback"></span>
+				</div>
+
+				<div class="col-12">
+					<div class="form-check">
+						<input class="form-check-input" asp-for="RememberMe" type="checkbox" id="invalidCheck">
+						<label class="form-check-label" for="invalidCheck">
+							Remember me?
+						</label>
+					</div>
+				</div>
+
+				<div class="col-12">
+					<button class="btn btn-primary" type="submit">Submit</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

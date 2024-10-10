@@ -6,6 +6,7 @@ using Blog.Data;
 using Blog.Data.Repositories;
 using Blog.Data.SeedWorks;
 using Blog.WebApp.Helpers;
+using Blog.WebApp.Helpers.Events.Login;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,6 +72,7 @@ foreach (Type? service in services)
 }
 
 builder.Services.AddAutoMapper(typeof(PostResponse));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginEvent).Assembly));
 
 // Auth
 builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
