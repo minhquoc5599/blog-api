@@ -5,7 +5,7 @@ using Blog.WebApp.Helpers.Constants;
 using Blog.WebApp.Helpers.Events.Login;
 using Blog.WebApp.Helpers.Events.Register;
 using Blog.WebApp.Helpers.Extensions;
-using Blog.WebApp.Models;
+using Blog.WebApp.Models.Auth;
 using Blog.WebApp.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace Blog.WebApp.Controllers
 {
-	public class AuthController : Controller
+    public class AuthController : Controller
 	{
 		private readonly UserManager<AppUser> _userManager;
 		private readonly SignInManager<AppUser> _signInManager;

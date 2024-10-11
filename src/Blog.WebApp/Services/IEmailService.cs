@@ -1,8 +1,8 @@
-﻿using Blog.WebApp.Models;
+﻿using Blog.WebApp.Models.Auth;
 
 namespace Blog.WebApp.Services
 {
-	public interface IEmailService
+    public interface IEmailService
 	{
 		Task SendEmail(EmailModel emailData);
 	}

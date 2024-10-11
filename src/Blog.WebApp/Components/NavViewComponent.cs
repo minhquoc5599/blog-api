@@ -1,5 +1,5 @@
 ﻿using Blog.Core.SeedWorks;
-using Blog.WebApp.Models;
+using Blog.WebApp.Models.Nav;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.WebApp.Components

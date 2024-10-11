@@ -3,7 +3,7 @@ using Blog.Core.SeedWorks;
 using Blog.Core.SeedWorks.Constants;
 using Blog.WebApp.Helpers.Constants;
 using Blog.WebApp.Helpers.Extensions;
-using Blog.WebApp.Models;
+using Blog.WebApp.Models.User;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

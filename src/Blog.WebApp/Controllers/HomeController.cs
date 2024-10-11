@@ -1,5 +1,6 @@
 using Blog.Core.SeedWorks;
-using Blog.WebApp.Models;
+using Blog.WebApp.Models.Home;
+using Blog.WebApp.Models.Error;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 

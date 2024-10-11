@@ -1,5 +1,5 @@
 ﻿using Blog.Core.Configs;
-using Blog.WebApp.Models;
+using Blog.WebApp.Models.Auth;
 using HandlebarsDotNet;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
@@ -7,7 +7,7 @@ using MimeKit;
 
 namespace Blog.WebApp.Services
 {
-	public class EmailService : IEmailService
+    public class EmailService : IEmailService
 	{
 		private readonly EmailSettings _emailSettings;
 

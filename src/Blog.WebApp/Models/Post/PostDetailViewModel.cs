@@ -1,6 +1,6 @@
 ﻿using Blog.Core.Models.Content;
 
-namespace Blog.WebApp.Models
+namespace Blog.WebApp.Models.Post
 {
     public class PostDetailViewModel
     {
