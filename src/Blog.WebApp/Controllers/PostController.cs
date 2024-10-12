@@ -135,6 +135,17 @@ namespace Blog.WebApp.Controllers
 			return View(model);
 		}
 
+		[HttpGet]
+		[Route("posts/list")]
+		public async Task<IActionResult> ListByUser(string keyword, int page = 1)
+		{
+			var posts = await _unitOfWork.Posts.GetPostsByUserId(keyword, User.GetUserId(), page, 2);
+			return View(new PostListByUserViewModel()
+			{
+				Posts = posts
+			});
+		}
+
 		private async Task<CreatePostViewModel> InitCreatePostViewModel()
 		{
 			var model = new CreatePostViewModel()

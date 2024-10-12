@@ -1,0 +1,82 @@
+﻿@model PostListByUserViewModel
+@{
+	ViewData["Title"] = "Post list";
+	ViewData["Description"] = "Post list";
+}
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
+	<div class="container position-relative px-4 px-lg-5">
+		<div class="row gx-4 gx-lg-5 justify-content-center">
+			<div class="col-md-10 col-lg-8 col-xl-7">
+				<div class="site-heading">
+					<h1>Post list</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+	<div class="row gx-4 gx-lg-5 justify-content-center">
+		<div class="col-12">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Total posts</th>
+						<th scope="col">Total draft posts</th>
+						<th scope="col">Total waiting posts</th>
+						<th scope="col">Total published posts</th>
+						<th scope="col">Total unpaid amount</th>
+						<th scope="col">Total paid amount</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>@Model.TotalPosts</td>
+						<td>@Model.TotalDraftPosts</td>
+						<td>@Model.TotalWaitingApprovalPosts</td>
+						<td>@Model.TotalPublishedPosts</td>
+						<td>@Model.TotalUnpaidPosts</td>
+						<td>@Model.TotalPaidAmount</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row gx-4 gx-lg-5 justify-content-center">
+		<div class="col-12">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Title</th>
+						<th scope="col">Category</th>
+						<th scope="col">Date created</th>
+						<th scope="col">View count</th>
+						<th scope="col">Status</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model.Posts.Results)
+					{
+						<tr>
+
+							<td><a href="@AppUrl.CreatePost?id=@item.Id">@item.Name</a></td>
+							<td>@item.CategoryName</td>
+							<td>@item.DateCreated</td>
+							<td>@item.ViewCount</td>
+							<td>@item.Status</td>
+							@* <td>
+						<a class="btn btn-success" href="@AppUrl.SendApprovalPost">Send to approval</a>
+						</td> *@
+
+						</tr>
+					}
+				</tbody>
+			</table>
+			<!-- Pagination-->
+			@(await Component.InvokeAsync("Pagination", Model.Posts))
+		</div>
+	</div>
+</div>

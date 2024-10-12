@@ -43,7 +43,7 @@ namespace Blog.Data.Repositories
 			}
 
 			var query = _context.Posts.AsQueryable();
-			if (!string.IsNullOrEmpty(keyword))
+			if (!string.IsNullOrWhiteSpace(keyword))
 			{
 				query = query.Where(x => x.Name.Contains(keyword));
 			}
@@ -262,6 +262,29 @@ namespace Blog.Data.Repositories
 						where t.Slug == tag && p.Status == PostStatus.Published
 						select p;
 
+			var totalRow = await query.CountAsync();
+			query = query.OrderByDescending(x => x.DateCreated)
+				.Skip((pageIndex - 1) * pageSize)
+				.Take(pageSize);
+
+			return new PagingResponse<PostResponse>
+			{
+				Results = await _mapper.ProjectTo<PostResponse>(query).ToListAsync(),
+				CurrentPage = pageIndex,
+				RowCount = totalRow,
+				PageSize = pageSize
+			};
+		}
+
+		public async Task<PagingResponse<PostResponse>> GetPostsByUserId(string keyword, Guid userId, int pageIndex = 1,
+			int pageSize = 10)
+		{
+			var query = _context.Posts.Where(x=>x.AuthorUserId == userId).AsQueryable();
+			if (!string.IsNullOrWhiteSpace(keyword))
+			{
+				query = query.Where(x => x.Name.Contains(keyword));
+			}
+			
 			var totalRow = await query.CountAsync();
 			query = query.OrderByDescending(x => x.DateCreated)
 				.Skip((pageIndex - 1) * pageSize)

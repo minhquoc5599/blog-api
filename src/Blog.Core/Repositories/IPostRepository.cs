@@ -28,5 +28,6 @@ namespace Blog.Core.Repositories
 		Task<List<string>> GetTagsByPostId(Guid postId);
 		Task<List<TagResponse>> GetDetailTagsByPostId(Guid postId);
 		Task<PagingResponse<PostResponse>> GetPostsByTag(string tag, int pageIndex = 1, int pageSize = 10);
+		Task<PagingResponse<PostResponse>> GetPostsByUserId(string keyword, Guid userId, int pageIndex = 1, int pageSize = 10);
 	}
 }
