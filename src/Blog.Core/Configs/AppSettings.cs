@@ -4,5 +4,6 @@
 	{
 		public string Name { get; set; }
 		public string Slogan { get; set; }
+		public string BackendApiUrl { get; set; }
 	}
 }

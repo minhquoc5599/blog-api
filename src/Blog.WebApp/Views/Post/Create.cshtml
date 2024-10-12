@@ -1,0 +1,76 @@
+﻿@{
+	ViewData["Title"] = "Create post";
+	ViewData["Description"] = "Create post";
+}
+@section Scripts{
+	
+}
+@model CreatePostViewModel
+<!-- Page Header-->
+<header class="masthead" style="background-image: url('assets/img/home-bg.jpg')">
+	<div class="container position-relative px-4 px-lg-5">
+		<div class="row gx-4 gx-lg-5 justify-content-center">
+			<div class="col-md-10 col-lg-8 col-xl-7">
+				<div class="site-heading">
+					<h1>Create post</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+	<div class="row gx-4 gx-lg-5 justify-content-center">
+		<div class="col-md-8 col-lg-6 col-xl-5">
+			<form asp-action="Create" asp-controller="Post" method="post" class="row g-3" enctype="multipart/form-data">
+				<div class="alert alert-danger" asp-validation-summary="ModelOnly"></div>
+
+				@if (TempData[AppConstant.SuccessFormMessage] != null)
+				{
+					<div class="alert alert-success">@TempData[AppConstant.SuccessFormMessage]</div>
+				}
+
+				<div class="col-md-12">
+					<label for="title" class="form-label">Title</label>
+					<input type="text" class="form-control" asp-for="Title" id="title" required>
+					<span asp-validation-for="Title" class="invalid-feedback"></span>
+				</div>
+
+				<div class="col-md-12">
+					<label for="description" class="form-label">Description</label>
+					<input type="text" class="form-control" asp-for="Description" id="description" required>
+					<span asp-validation-for="Description" class="invalid-feedback"></span>
+				</div>
+
+				<div class="col-md-12">
+					<label for="Category" class="form-label">Category</label>
+					<select asp-for="CategoryId" class="form-control" asp-items="Model.CategoryList">
+						<option>Please select category</option>
+					</select>
+					<span asp-validation-for="CategoryId" class="invalid-feedback"></span>
+				</div>
+
+				<div class="col-md-12">
+					<label for="thumbnail" class="form-label">Thumbnail</label>
+					<input type="file" class="form-control" name="thumbnail" id="thumbnail" required>
+					<input type="hidden" asp-for="ThumbnailImage" />
+				</div>
+
+				<div class="col-md-12">
+					<label for="seoDescription" class="form-label">SEO Description</label>
+					<textarea class="form-control" asp-for="SeoDescription" id="SeoDescription" rows="3"></textarea>
+				</div>
+
+				<div class="col-md-12">
+					<label for="content" class="form-label">Content</label>
+					<textarea class="form-control" asp-for="Content" id="txtContent" rows="3"></textarea>
+				</div>
+
+				<div class="col-12">
+					<button class="btn btn-primary" type="submit">Submit</button>
+					<a href="@AppUrl.PostByUser">Back to list</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

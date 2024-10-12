@@ -1,15 +1,32 @@
-﻿using Blog.Core.SeedWorks;
+﻿using Blog.Core.Configs;
+using Blog.Core.Domain.Content;
+using Blog.Core.Domain.Identity;
+using Blog.Core.SeedWorks;
+using Blog.Core.SeedWorks.Constants;
+using Blog.WebApp.Helpers.Constants;
+using Blog.WebApp.Helpers.Extensions;
 using Blog.WebApp.Models.Post;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Options;
+using System.Net;
+using System.Text.Json;
 
 namespace Blog.WebApp.Controllers
 {
 	public class PostController : Controller
 	{
 		private readonly IUnitOfWork _unitOfWork;
-		public PostController(IUnitOfWork unitOfWork)
+		private readonly UserManager<AppUser> _userManager;
+		private readonly AppSettings _appSettings;
+		public PostController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager,
+			IOptions<AppSettings> appSettings)
 		{
 			_unitOfWork = unitOfWork;
+			_userManager = userManager;
+			_appSettings = appSettings.Value;
 		}
 
 		[Route("posts")]
@@ -60,6 +77,101 @@ namespace Blog.WebApp.Controllers
 				Tags = tags
 			};
 			return View(viewModel);
+		}
+
+		[HttpGet]
+		[Route("post/create")]
+		[Authorize]
+		public async Task<IActionResult> Create()
+		{
+			return View(await InitCreatePostViewModel());
+		}
+
+		[HttpPost]
+		[Route("post/create")]
+		[Authorize]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create([FromForm] CreatePostViewModel model, IFormFile thumbnail)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(await InitCreatePostViewModel());
+			}
+
+			var userId = User.GetUserId();
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+			var postCategory = await _unitOfWork.PostCategories.GetByIdAsync(model.CategoryId);
+			var post = new Post
+			{
+				Name = model.Title,
+				CategoryName = postCategory.Name,
+				CategorySlug = postCategory.Slug,
+				Slug = TextExtension.ToUnsignedString(model.Title),
+				CategoryId = model.CategoryId,
+				Content = model.Content,
+				SeoDescription = model.SeoDescription,
+				Status = PostStatus.Draft,
+				AuthorUserId = userId,
+				AuthorName = user.GetFullName(),
+				AuthorUserName = user.UserName,
+				Description = model.Description,
+			};
+			_unitOfWork.Posts.Add(post);
+
+			if (thumbnail != null)
+			{
+				await UploadThumbnail(thumbnail, post);
+			}
+			var result = await _unitOfWork.CompleteAsync();
+			if (result > 0)
+			{
+				TempData[AppConstant.SuccessFormMessage] = "Create post successfully.";
+				return Redirect(AppUrl.Profile);
+			}
+			else
+			{
+				ModelState.AddModelError(string.Empty, "Create post failed");
+			}
+			return View(model);
+		}
+
+		private async Task<CreatePostViewModel> InitCreatePostViewModel()
+		{
+			var model = new CreatePostViewModel()
+			{
+				Title = "Untitled",
+				CategoryList = new SelectList(await _unitOfWork.PostCategories.GetAllAsync(), "Id", "Name")
+			};
+			return model;
+		}
+
+		private async Task UploadThumbnail(IFormFile thumbnail, Post post)
+		{
+			using (var client = new HttpClient())
+			{
+				client.BaseAddress = new Uri(_appSettings.BackendApiUrl);
+				byte[] data;
+				using (var br = new BinaryReader(thumbnail.OpenReadStream()))
+				{
+					data = br.ReadBytes((int)thumbnail.OpenReadStream().Length);
+				}
+				var bytes = new ByteArrayContent(data);
+				var multiContent = new MultipartFormDataContent
+				{
+					{ bytes, "file", thumbnail.FileName }
+				};
+				var uploadResult = await client.PostAsync("api/admin/media?type=posts", multiContent);
+				if (uploadResult.StatusCode != HttpStatusCode.OK)
+				{
+					ModelState.AddModelError("", await uploadResult.Content.ReadAsStringAsync());
+				}
+				else
+				{
+					var path = await uploadResult.Content.ReadAsStringAsync();
+					var pathObj = JsonSerializer.Deserialize<UploadResponse>(path);
+					post.Thumbnail = pathObj?.Path;
+				}
+			}
 		}
 	}
 }

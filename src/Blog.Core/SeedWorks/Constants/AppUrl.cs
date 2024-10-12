@@ -21,6 +21,8 @@
 		public static string PostByTag = "/tag/{0}";
 		public static string Series = "/series";
 		public static string SeriesDetail = "/series/{0}";
+		public static string CreatePost = "/post/create";
+		public static string PostByUser = "/posts/list";
 
 		// Author
 		public static string Author = "/author/{0}";
